@@ -1,60 +1,5 @@
 #include <CAN.h>
 
-/*******************************************************************************
- * Gestion de listes 
- ******************************************************************************/
-list_node* newListNodeWithNode(node* n)
-{
-  list_node* ret = (list_node*)malloc(sizeof(list_node));
-  ret->n = n;
-  ret->next = NULL;
-  return ret;
-}
-
-list_node* newListNode()
-{
-  return newListNodeWithNode(NULL);
-}
-
-/* @todo opti par rapport à la fréquence de parcours */
-list_node* addNodeToListNode(list_node* ln, node* n)
-{
-  list_node* ret = newListNodeWithNode(n);
-  ret->next = ln;
-  return ret;
-}
-
-node* popNodeFromListNode(list_node** ln, int nodeId)
-{
-  node* ret = NULL;
-  if( (*ln)->n ){
-    list_node *prev = NULL, *tmp = *ln;
-    while( tmp ){
-      if( tmp->n->id == nodeId ){
-	if( prev )
-	  prev->next = tmp->next;
-	else
-	  (*ln) = (*ln)->next;
-      }
-      prev = tmp;
-      tmp = tmp->next;
-    }
-  }
-  return ret;
-}
-
-list_node* cloneListNode(list_node* ln)
-{
-  list_node* ret = newListNodeWithNode(ln->n);
-  list_node* tmp = ret;
-  while(ln->next) {
-    ln = ln->next;
-    tmp->next = newListNodeWithNode(ln->n);
-    tmp = tmp->next;
-  }
-  return ret;
-}
-
 /* src : le nouveau né 
  * trg : le vieux con 
  */
@@ -66,18 +11,6 @@ void updateNeighborsForDirection(list_node* ln, int dir, node* src, node* trg)
     ln = ln->next;
   }
 }
-
-void freeListNode(list_node* ln)
-{
-  if( ln ){
-    freeListNode(ln->next);
-    free(ln);
-  }
-
-  return;
-}
-
-/* Je m'engage à ne pas toucher les fonctions précédemment écrites ( ou pas ) */
 
 /*******************************************************************************
  * Primitives
