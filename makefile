@@ -1,10 +1,9 @@
-# TP02 - Implantation sous MPI d'horloges de Lamport
-#
+# Projet AR - Content-Adressable Network
+# 
 # @author Ilyas Toumlilt <toumlilt.ilyas@gmail.com>
-# @copyright (c) 2015, toumlilt
+# @author Paul  Mabillot <paul.mabilot@etu.upmc.fr>
 #
 # @version 1.0
-# @package toumlilt/M1/AR
 
 CC=gcc -Wall -ansi
 BIN=bin
@@ -34,11 +33,10 @@ $(BIN)/% : $(OBJ)/%.o
 	$(CC) -o $@ $< ${LPTHREAD}
 #fin regles generales
 
-# without server
-can: $(BIN)/CAN
+$(LIB)/libCAN.a: $(OBJ)/point.o $(OBJ)/space.o $(OBJ)/node.o $(OBJ)/list_node.o $(OBJ)/CAN.o
+	ar -rcs $@ $^
 
-# with server
-# comming soon
+can: $(LIB)/libCAN.a
 
 clean:
 	rm -f ${OBJ}/* ${BIN}/* ${LIB}/*

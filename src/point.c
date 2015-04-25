@@ -1,0 +1,58 @@
+/**
+ * Projet AR - Content-Adressable Network
+ * Primitives de gestion des point - Implementation
+ *
+ * Un point se compose de deux coordonnées x et y.
+ *
+ * @author Ilyas Toumlilt <toumlilt.ilyas@gmail.com>
+ * @author Paul  Mabillot <paul.mabillot@etu.upmc.fr>
+ *
+ * @version 1.0
+ */
+
+#include <point.h>
+
+/*******************************************************************************
+ * Constructor
+ ******************************************************************************/
+/**
+ * Constructeur
+ *
+ * @param x coordonnée horizontale
+ * @param y coordonnée verticale
+ * @return le point alloué 
+ */
+point* newPoint(int x, int y)
+{
+  point* ret = (point*)malloc(sizeof(point));
+  ret->x = x;
+  ret->y = y;
+
+  return ret;
+}
+
+/**
+ * Constructeur d'un point avec des coordonnées aléatoires
+ *
+ * @return le point alloué
+ */
+point* newRandomPoint()
+{
+  /* @todo ne pas oublier le srand() */
+  return newPoint(rand()%COORD_MAX, rand()%COORD_MAX);
+}
+
+/*******************************************************************************
+ * Destructor
+ ******************************************************************************/
+/**
+ * Destructeur
+ *
+ * @param p le point à désallouer
+ */
+void freePoint(point* p)
+{
+  free(p);
+
+  return;
+}
