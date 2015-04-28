@@ -16,15 +16,15 @@
 #include <CAN.h>
 
 struct _space{
-  point* down_left;
-  point* up_right;
+  point* south_west;
+  point* north_east;
 };
 
 /*******************************************************************************
  * Constructors
  ******************************************************************************/
-space* newSpace(point* down_left, point* up_right);
-space* newSpaceWithCoord(int x1, int y1, int x2, int y2);
+space* newSpace(point* south_east, point* north_west);
+space* newSpaceWithCoord(int x_sw, int y_sw, int x_ne, int y_ne);
 
 /*******************************************************************************
  * Destructor

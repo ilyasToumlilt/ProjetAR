@@ -13,8 +13,49 @@ void updateNeighborsForDirection(list_node* ln, int dir, node* src, node* trg)
 }
 
 /*******************************************************************************
+ * Initialization
+ ******************************************************************************/
+int nbProcess;
+int idProcess;
+void CANinitialize()
+{
+  /* getting total number of process */
+  MPI_Comm_size(MPI_COMM_WORLD, &nbProcess);
+
+  /* getting my process id */
+  MPI_Comm_rank(MPI_COMM_WORLD, &idProcess);
+}
+
+/*******************************************************************************
  * Etape 1 : Insertion de noeud
  ******************************************************************************/
+void CANinsert()
+{
+  if( idProcess == INIT_NODE ){
+    
+  } else {
+    /* chaque process tire aléatoirement son point */
+    point* coord = newRandomPoint();
+
+    /* attente de l'autorisation à s'insérer */
+    MPI_Status status;
+    int buf;
+    MPI_Recv(&buf, 1, MPI_INT, MPI_ANY_SOURCE, CAN_INSERT, 
+	     MPI_COMM_WORLD, &status);
+
+    if( idProcess == BOOTSTRAP_NODE ){
+      /* le BOOTSTRAP_NODE sera toujours le premier à s'insérer donc
+	 il prendra par défaut toute la surface */
+      node* myNode = newNode(idProcess,
+			     coord,
+			     newSpaceWithCoord())
+    } else {
+      
+    }
+  }
+  
+}
+
 
 /*
  * @todo si je peux me passer de cette merde ..

@@ -18,8 +18,17 @@
 
 #define N 10
 
+/* MPI's Process vars */
+#define INIT_NODE      0
 #define BOOTSTRAP_NODE 1
 
+/*******************************************************************************
+ * MPI tags definition
+ ******************************************************************************/
+#define CAN_INSERT 10
+
+
+/* structs */
 typedef struct _point     point;
 typedef struct _space     space;
 typedef struct _node      node;
