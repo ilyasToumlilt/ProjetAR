@@ -1,4 +1,4 @@
-/**
+*/**
  * Projet AR - Content-Adressable Network
  * Primitives de gestion des noeuds - Header
  *
@@ -6,7 +6,7 @@
  * l'espace dont il s'occupe, et la liste de ses voisins
  *
  * @author Ilyas Toumlilt <toumlilt.ilyas@gmail.com>
- * @author Paul  Mabillot <paul.mabilot@etu.upmc.fr>
+ * @author Paul  Mabillot <paul.mabillot@etu.upmc.fr>
  *
  * @version 1.0
  */

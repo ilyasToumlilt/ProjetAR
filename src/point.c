@@ -18,8 +18,8 @@
 /**
  * Constructeur
  *
- * @param x coordonnée horizontale
- * @param y coordonnée verticale
+ * @param x coordonnée horizontale dans [COORD_MIN_X, COORD_MAX_X[
+ * @param y coordonnée verticale dans [COORD_MIN_Y, COORD_MAX_Y[
  * @return le point alloué 
  */
 point* newPoint(int x, int y)
@@ -39,7 +39,8 @@ point* newPoint(int x, int y)
 point* newRandomPoint()
 {
   /* @todo ne pas oublier le srand() */
-  return newPoint(rand()%COORD_MAX, rand()%COORD_MAX);
+  return newPoint((rand()%COORD_MAX_X)+COORD_MIN_X, 
+		  (rand()%COORD_MAX_Y)+COORD_MIN_Y);
 }
 
 /*******************************************************************************

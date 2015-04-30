@@ -15,9 +15,6 @@
 
 #include <CAN.h>
 
-#define COORD_MIN 0
-#define COORD_MAX 1000
-
 struct _point {
   int x;
   int y;

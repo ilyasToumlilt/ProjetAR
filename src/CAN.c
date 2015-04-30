@@ -31,16 +31,39 @@ void CANinitialize()
  ******************************************************************************/
 void CANinsert()
 {
+  int buf, i;
+  MPI_Status status;
+
   if( idProcess == INIT_NODE ){
+    /* Le coordinateur demande au bootstrap de s'insérer */
+    MPI_Send(&buf, 1, MPI_INT, BOOTSTRAP_NODE, CAN_INSERT, MPI_COMM_WORLD);
+
+    /* Attente de bonne insertion du bootstrap */
+    MPI_Recv(&buf, 1, MPI_INT, BOOTSTRAP_NODE, DONE_INSERT,
+	     MPI_COMM_WORLD, &status);
+
+    for(i=0; i<nbProcess; i++){
+      if( i != BOOTSTRAP_NODE && i != INIT_NODE ){
+	/* On lui demande de s'inserer */
+	MPI_Send(&buf, 1, MPI_INT, i, CAN_INSERT, MPI_COMM_WORLD);
+
+	/* Attente de bonne insertion du noeud */
+	MPI_Recv(&buf, 1, MPI_INT, i, MPI_ANY_TAG,
+		 MPI_COMM_WORLD, &status);
+
+	if( status.MPI_TAG == FAILED_INSERT ){
+	  fprintf(stderr, "ERROR: Failed insert\n");
+	  continue;
+	}
+      }
+    }
     
   } else {
     /* chaque process tire aléatoirement son point */
     point* coord = newRandomPoint();
 
     /* attente de l'autorisation à s'insérer */
-    MPI_Status status;
-    int buf;
-    MPI_Recv(&buf, 1, MPI_INT, MPI_ANY_SOURCE, CAN_INSERT, 
+    MPI_Recv(&buf, 1, MPI_INT, MPI_ANY_SOURCE, U_CAN_INSERT, 
 	     MPI_COMM_WORLD, &status);
 
     if( idProcess == BOOTSTRAP_NODE ){
@@ -48,7 +71,13 @@ void CANinsert()
 	 il prendra par défaut toute la surface */
       node* myNode = newNode(idProcess,
 			     coord,
-			     newSpaceWithCoord())
+			     newSpaceWithCoord(COORD_MIN_X,
+					       COORD_MIN_Y,
+					       COORD_MAX_X,
+					       COORD_MAX_Y));
+      
+      MPI_Send(&buf, 1, MPI_INT, INIT_NODE, DONE_INSERT,
+	       MPI_COMM_WORLD);
     } else {
       
     }

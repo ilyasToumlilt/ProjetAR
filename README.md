@@ -44,3 +44,24 @@
 
 **Soumission**
     le 30 avril
+
+**todo**
+OK marche en mono
+KO revoir l'attribution des voisins p
+KO insert MPI i
+KO .c .h primitives des données p
+
+KO inserer ses données i
+KO recherche MPI i
+KO suppression i
+KO test case p
+KO sortie pour affichage p
+OK affichage p
+
+**test case**
+une première ligne avec :
+<nbNodes> <nbData>
+nbNodes lignes avec :
+id x y
+nbDatas lignes avec
+data x y
