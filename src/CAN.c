@@ -205,34 +205,95 @@ int chooseDirectionRandomly(int direction)
   }
 }
 
+/*
+ * On sauvegarde au cas ou ...
+ */
+ 
+//int manageSpaceInsert(node* src, node* trg)
+//{
+//  src->area = getNodesSubSpace(trg);
+//  /* si c'est le même x c'est que trg est ou en haut ou à droite */
+//  if( src->area->down_left->x == trg->area->down_left->x ){
+//    /* si c'est le même y en up_right c'est à droite */
+//    if( src->area->up_right->y == trg->area->up_right->y ){
+//      /* à droite */
+//      trg->area->down_left->x = src->area->up_right->x;
+//      src->neighbors[EAST]->n = trg;
+//      /* @todo vider la liste avant de la reremplir */
+//      src->neighbors[NORTH]   = cloneListNode(trg->neighbors[NORTH]);
+//      src->neighbors[SOUTH]   = cloneListNode(trg->neighbors[SOUTH]);
+//      src->neighbors[WEST]    = trg->neighbors[WEST];
+//      trg->neighbors[WEST]    = newListNodeWithNode(src);
+//      /* update neighbors */
+//      updateNeighborsForDirection(src->neighbors[WEST], EAST, src, trg);
+//    } else {
+//      trg->area->down_left->y = src->area->up_right->y;
+//    }
+//  } else {
+//    if( src->area->down_left->y == trg->area->down_left->y ){
+//      /* à gauche */
+//      trg->area->up_right->x = src->area->down_left->x;
+//    } else {
+//      trg->area->up_right->y = src->area->down_left->y;
+//    }
+//  }
+//}
+
+/*
+ * Quatre cas possible
+ * Deux verticales, Deux horizontales.
+ * 
+ * A voir si on modifie ici l'espace et les voisins de trg ou pas.
+ */
 int manageSpaceInsert(node* src, node* trg)
 {
   src->area = getNodesSubSpace(trg);
-  /* si c'est le même x c'est que trg est ou en haut ou à droite */
+  
+  
   if( src->area->down_left->x == trg->area->down_left->x ){
-    /* si c'est le même y en up_right c'est à droite */
-    if( src->area->up_right->y == trg->area->up_right->y ){
-      /* à droite */
-      trg->area->down_left->x = src->area->up_right->x;
-      src->neighbors[EAST]->n = trg;
-      /* @todo vider la liste avant de la reremplir */
-      src->neighbors[NORTH]   = cloneListNode(trg->neighbors[NORTH]);
-      src->neighbors[SOUTH]   = cloneListNode(trg->neighbors[SOUTH]);
-      src->neighbors[WEST]    = trg->neighbors[WEST];
-      trg->neighbors[WEST]    = newListNodeWithNode(src);
-      /* update neighbors */
-      updateNeighborsForDirection(src->neighbors[WEST], EAST, src, trg);
-    } else {
-      trg->area->down_left->y = src->area->up_right->y;
-    }
-  } else {
-    if( src->area->down_left->y == trg->area->down_left->y ){
-      /* à gauche */
-      trg->area->up_right->x = src->area->down_left->x;
-    } else {
-      trg->area->up_right->y = src->area->down_left->y;
-    }
+	/* séparation horizontale (2 cas) ou verticale avec src a gauche */
+	if( src->area->down_left->y == trg->area->down_left->y ){
+		/* séparation horizontale src sous trg ou verticale avec src a gauche */
+		if( src->area->up_right->y == trg->area->up_right->y ){
+			/* Src a GAUCHE de Trg */
+			/* Voisin de src */
+			src->neighbors[EAST]->n = newListNode(trg, NULL);
+			src->neighbors[WEST]->n = cloneListNode(trg->neighbors[WEST]);
+			
+			/* A voir en fonction des espaces */
+			src->neighbors[NORTH]->n = cloneListNode(trg->neighbors[NORTH]);
+			src->neighbors[SOUTH]->n = cloneListNode(trg->neighbors[SOUTH]);
+		}else{
+			/* Src en BAS de Trg */
+			/* Voisin de src */
+			src->neighbors[NORTH]->n = newListNode(trg, NULL);
+			src->neighbors[SOUTH]->n = cloneListNode(trg->neighbors[SOUTH]);
+			
+			/* A voir en fonction des espaces */
+			src->neighbors[EAST]->n = cloneListNode(trg->neighbors[EAST]);
+			src->neighbors[WEST]->n = cloneListNode(trg->neighbors[WEST]);
+		}
+	}else{
+		/* Src a en HAUT de Trg */
+		/* Voisin de src */
+		src->neighbors[NORTH]->n = cloneListNode(trg->neighbors[NORTH]);
+		src->neighbors[SOUTH]->n = newListNode(trg, NULL);
+			
+		/* A voir en fonction des espaces */
+		src->neighbors[EAST]->n = cloneListNode(trg->neighbors[EAST]);
+		src->neighbors[WEST]->n = cloneListNode(trg->neighbors[WEST]);
+	}
+  } else{
+	/* Src à DROITE de Trg */
+	/* Voisin de src */
+	src->neighbors[EAST]->n = cloneListNode(trg->neighbors[EAST])
+	src->neighbors[WEST]->n = newListNode(trg, NULL);
+			
+	/* A voir en fonction des espaces */
+	src->neighbors[NORTH]->n = cloneListNode(trg->neighbors[NORTH]);
+	src->neighbors[SOUTH]->n = cloneListNode(trg->neighbors[SOUTH]);
   }
+  return 1;
 }
 
 int insertNodeInNode(node* src, node* trg)
