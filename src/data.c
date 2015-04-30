@@ -1,8 +1,8 @@
-*/**
+ï»¿*/**
  * Projet AR - Content-Adressable Network
- * Primitives de gestion des données - Header
+ * Primitives de gestion des donnÃ©es - Header
  *
- * Une Donnée contient une valeur, ses coordonnées,
+ * Une DonnÃ©e contient une valeur, ses coordonnÃ©es,
  *
  * @author Ilyas Toumlilt <toumlilt.ilyas@gmail.com>
  * @author Paul  Mabillot <paul.mabillot@etu.upmc.fr>
