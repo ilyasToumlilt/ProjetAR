@@ -49,7 +49,7 @@
 OK marche en mono
 KO revoir l'attribution des voisins p
 KO insert MPI i
-KO .c .h primitives des données p
+OK .c .h primitives des données p
 
 KO inserer ses données i
 KO recherche MPI i
