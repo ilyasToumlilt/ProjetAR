@@ -26,7 +26,7 @@ node* newNode(int id, point* coord, space* area)
   int i;
   for(i=0; i<NB_DIRECTIONS;i++)
     ret->neighbors[i] = newListNode();
-
+  //ret->datas = newListData(NULL, NULL);
   return ret;
 }
 
@@ -45,6 +45,7 @@ void freeNode(node* n)
   int i;
   for(i=0; i<NB_DIRECTIONS; i++)
     freeListNode(n->neighbors[i]);
+  //freeListData(n->datas);
   free(n);
 
   return;

@@ -1,4 +1,4 @@
-*/**
+/**
  * Projet AR - Content-Adressable Network
  * Primitives de gestion des noeuds - Header
  *
@@ -21,6 +21,7 @@ struct _node {
   point* coord;
   space* area;
   list_node* neighbors[NB_DIRECTIONS];
+  //list_data* datas;
 };
 
 /*******************************************************************************
