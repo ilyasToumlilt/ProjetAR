@@ -18,8 +18,8 @@
 
 typedef struct _list_node list_node;
 struct _list_node {
-  int id;
-  list_node* next;
+  int idList[N-1]; /* @todo largement améliorable */
+  int size;
 };
 
 /*******************************************************************************
@@ -32,7 +32,7 @@ struct _list_node {
  * @param next le noeud suivant
  * @return liste_node* l'element alloué.
  */
-list_node* newListNode(int id, list_node* next);
+list_node newListNode();
 
 /*******************************************************************************
  * Destructors
@@ -43,7 +43,7 @@ list_node* newListNode(int id, list_node* next);
  *
  * @param ln pointeur sur la list_node à detruire.
  */
-void freeListNode(list_node* ln);
+/*void freeListNode(list_node* ln);*/
 
 /*******************************************************************************
  * Operations
@@ -54,7 +54,7 @@ void freeListNode(list_node* ln);
  * @param ln adresse de la liste 
  * @param n le noeud à empiler
  */
-void pushNodeToListNode(list_node** ln, int id);
+void pushNodeToListNode(list_node* ln, int id);
 
 /**
  * Dépile un élement ( le premier ) de la liste
@@ -62,7 +62,7 @@ void pushNodeToListNode(list_node** ln, int id);
  * @param ln adresse de la liste
  * @return le noeud dépilé, NULL si liste vide
  */
-int popNodeFromListNode(list_node** ln);
+int popNodeFromListNode(list_node* ln);
 
 /**
  * Dépile l'element d'identidiant id de la liste.
@@ -71,7 +71,7 @@ int popNodeFromListNode(list_node** ln);
  * @param id l'identifiant du noeud à dépiler.
  * @return le noeud dépilé
  */
-int popNodeFromListNodeById(list_node** ln, int id);
+int popNodeFromListNodeById(list_node* ln, int id);
 
 /**
  * Produit une copie de la liste de noeuds passée en params
@@ -79,7 +79,7 @@ int popNodeFromListNodeById(list_node** ln, int id);
  * @param ln liste de noeuds à copier
  * @return copie de la liste
  */
-list_node* cloneListNode(list_node* ln);
+/*list_node* cloneListNode(list_node* ln);*/
 
 /*******************************************************************************
  * Views
@@ -89,6 +89,6 @@ list_node* cloneListNode(list_node* ln);
  *
  * @param ln la liste de noeuds à imprimer
  */
-void printListNode(list_node* ln);
+/*void printListNode(list_node* ln);*/
 
 #endif

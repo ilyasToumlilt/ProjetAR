@@ -24,11 +24,11 @@
  * @param next le noeud suivant
  * @return liste_node* l'element alloué.
  */
-list_node* newListNode(int id, list_node* next)
+list_node newListNode()
 {
-  list_node* ret = (list_node*)malloc(sizeof(list_node));
-  ret->id = id;
-  ret->next = next;
+  list_node ret;
+  ret.idList[0] = -1;
+  ret.size = 0;
   return ret;
 }
 
@@ -41,6 +41,7 @@ list_node* newListNode(int id, list_node* next)
  *
  * @param ln pointeur sur la list_node à detruire.
  */
+/*
 void freeListNode(list_node* ln)
 {
   if( ln ){
@@ -50,7 +51,7 @@ void freeListNode(list_node* ln)
 
   return;
 }
-
+*/
 /*******************************************************************************
  * Operations
  ******************************************************************************/
@@ -61,9 +62,10 @@ void freeListNode(list_node* ln)
  * @param ln adresse de la liste 
  * @param n le noeud à empiler
  */
-void pushNodeToListNode(list_node** ln, int id)
+void pushNodeToListNode(list_node* ln, int id)
 {
-  *(ln) = newListNode(id, *(ln));
+  ln->idList[ln->size] = id;
+  ln->size++;
   return;
 }
 
@@ -73,15 +75,12 @@ void pushNodeToListNode(list_node** ln, int id)
  * @param ln adresse de la liste
  * @return le noeud dépilé, NULL si liste vide
  */
-int popNodeFromListNode(list_node** ln)
+int popNodeFromListNode(list_node* ln)
 {
   int ret = -1;
-  if( (*ln) ){
-    list_node* first = *(ln);
-    *(ln) = first->next;
-    first->next = NULL;
-    ret = first->id;
-    freeListNode(first);
+  if( ln->size ){
+    ret = ln->idList[ln->size];
+    ln->size--;
   }
   return ret;
 }
@@ -93,18 +92,21 @@ int popNodeFromListNode(list_node** ln)
  * @param id l'identifiant du noeud à dépiler.
  * @return le noeud dépilé
  */
-int popNodeFromListNodeById(list_node** ln, int id)
+int popNodeFromListNodeById(list_node* ln, int id)
 {
   int ret = -1;
-  if( (*ln) ){
-    list_node **tmp = ln;
-    while( *(tmp) ){
-      if( (*tmp)->id == id ){
-	ret = popNodeFromListNode(tmp);
-	break;
-      }
-      tmp = &((*tmp)->next);
+  int i;
+  /* phase de recherche */
+  for(i=0; i<ln->size; i++){
+    if(ln->idList[i] == id){
+      ret = id;
+      ln->size--;
+      break;
     }
+  }
+  /* phase de décallage */
+  for(;i<ln->size; i++){
+    ln->idList[i] = ln->idList[i+1];
   }
   return ret;
 }
@@ -115,13 +117,14 @@ int popNodeFromListNodeById(list_node** ln, int id)
  * @param ln liste de noeuds à copier
  * @return copie de la liste
  */
+/*
 list_node* cloneListNode(list_node* ln)
 {
   if( !ln )
     return NULL;
   return newListNode(ln->id, cloneListNode(ln->next));
 }
-
+*/
 /*******************************************************************************
  * Views
  ******************************************************************************/
@@ -130,6 +133,7 @@ list_node* cloneListNode(list_node* ln)
  *
  * @param ln la liste de noeuds à imprimer
  */
+/*
 void printListNode(list_node* ln)
 {
   if( !ln ){
@@ -141,3 +145,4 @@ void printListNode(list_node* ln)
   
   return;
 }
+*/

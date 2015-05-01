@@ -157,7 +157,7 @@ void CANhandleInsertRequest(node* n)
     if( trg >= NB_DIRECTIONS )
       trg = chooseDirectionRandomly(trg);
     printf("HELLO\n");
-    MPI_Send(n, sizeof(node), MPI_BYTE, myNode.neighbors[trg]->id, 
+    MPI_Send(n, sizeof(node), MPI_BYTE, myNode.neighbors[trg].idList[0], 
 	     REQUEST_INSERT, MPI_COMM_WORLD);
     printf("OLLEH\n");
   }

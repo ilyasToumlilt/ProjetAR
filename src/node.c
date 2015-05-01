@@ -25,7 +25,7 @@ node newNode(int id, point coord, space area)
   ret.area = area;
   int i;
   for(i=0; i<NB_DIRECTIONS; i++)
-    ret.neighbors[i]=NULL;
+    ret.neighbors[i]=newListNode();
   return ret;
 }
 
@@ -42,9 +42,6 @@ void freeNode(node* n)
 {
   freePoint(&(n->coord));
   freeSpace(&(n->area));
-  int i;
-  for(i=0; i<NB_DIRECTIONS; i++)
-    freeListNode(n->neighbors[i]);
   free(n);
 
   return;

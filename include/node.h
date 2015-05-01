@@ -24,7 +24,7 @@ struct _node {
   int id;
   point coord;
   space area;
-  list_node* neighbors[NB_DIRECTIONS];
+  list_node neighbors[NB_DIRECTIONS]; /* @todo borne max largement améliorable */
 };
 
 /*******************************************************************************
