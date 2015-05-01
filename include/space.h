@@ -15,6 +15,7 @@
 
 #include <CAN.h>
 
+typedef struct _space space;
 struct _space{
   point* south_west;
   point* north_east;
@@ -23,7 +24,7 @@ struct _space{
 /*******************************************************************************
  * Constructors
  ******************************************************************************/
-space* newSpace(point* south_east, point* north_west);
+space* newSpace(point* south_west, point* north_east);
 space* newSpaceWithCoord(int x_sw, int y_sw, int x_ne, int y_ne);
 
 /*******************************************************************************

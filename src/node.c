@@ -25,8 +25,7 @@ node* newNode(int id, point* coord, space* area)
   ret->area = area;
   int i;
   for(i=0; i<NB_DIRECTIONS;i++)
-    ret->neighbors[i] = newListNode();
-  //ret->datas = newListData(NULL, NULL);
+    ret->neighbors[i] = NULL;
   return ret;
 }
 
@@ -45,7 +44,6 @@ void freeNode(node* n)
   int i;
   for(i=0; i<NB_DIRECTIONS; i++)
     freeListNode(n->neighbors[i]);
-  //freeListData(n->datas);
   free(n);
 
   return;
@@ -65,10 +63,10 @@ int isNodeInCoord(node* src, int x1, int y1, int x2, int y2)
 int isNodeInSpace(node* src, space* sp)
 {
   return isNodeInCoord(src,
-		       sp->down_left->x,
-		       sp->down_left->y,
-		       sp->up_right->x,
-		       sp->up_right->y);
+		       sp->south_west->x,
+		       sp->south_west->y,
+		       sp->north_east->x,
+		       sp->north_east->y);
 }
 
 /*
@@ -77,4 +75,12 @@ int isNodeInSpace(node* src, space* sp)
 int isNodeInNodesSpace(node* src, node* trg)
 {
   return isNodeInSpace(src, trg->area);
+}
+
+int isPointInNodesSpace(point* p, node* n)
+{
+  return (p->x >= n->area->south_west->x &&
+	  p->x <  n->area->north_east->x &&
+	  p->y >= n->area->south_west->y &&
+	  p->y <  n->area->north_east->y) ? 1 : 0;
 }

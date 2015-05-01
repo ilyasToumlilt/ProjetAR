@@ -16,12 +16,12 @@
 
 #include <CAN.h>
 
+typedef struct _node node;
 struct _node {
   int id;
   point* coord;
   space* area;
   list_node* neighbors[NB_DIRECTIONS];
-  //list_data* datas;
 };
 
 /*******************************************************************************
@@ -37,7 +37,8 @@ void freeNode(node* n);
  * Node containing
  ******************************************************************************/
 int isNodeInCoord(node* src, int x1, int y1, int x2, int y2);
-int isNodeInSpace(node* src, space* sp);
-int isNodeInNodesSpace(node* src, node* trg);
+int isNodeInSpace(node* src, space* sp);                      /* not used */
+int isNodeInNodesSpace(node* src, node* trg);                 /* not used */
+int isPointInNodesSpace(point* p, node* n);
 
 #endif

@@ -15,6 +15,7 @@
 
 #include <CAN.h>
 
+typedef struct _point point;
 struct _point {
   int x;
   int y;

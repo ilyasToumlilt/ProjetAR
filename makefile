@@ -5,7 +5,7 @@
 #
 # @version 1.0
 
-CC=gcc -Wall -ansi
+CC=mpicc -Wall -ansi
 BIN=bin
 INC=include
 LIB=lib

@@ -10,15 +10,17 @@
  * @version 1.0
  */
 
+#include <space.h>
+
 /*******************************************************************************
  * Constructors
  ******************************************************************************/
-space* newSpace(point* south_east, point* north_west) 
+space* newSpace(point* south_west, point* north_east) 
 {
   space* ret = (space*)malloc(sizeof(space));
 
-  ret->south_east = south_east;
-  ret->north_west = north_west;
+  ret->south_west = south_west;
+  ret->north_east = north_east;
 
   return ret;
 }
@@ -33,8 +35,8 @@ space* newSpaceWithCoord(int x_sw, int y_sw, int x_ne, int y_ne)
  ******************************************************************************/
 void freeSpace(space* sp)
 {
-  freePoint(sp->south_east);
-  freePoint(sp->north_west);
+  freePoint(sp->south_west);
+  freePoint(sp->north_east);
   free(sp);
 
   return;

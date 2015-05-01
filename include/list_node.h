@@ -16,6 +16,7 @@
 
 #include <CAN.h>
 
+typedef struct _list_node list_node;
 struct _list_node {
   node* n;
   list_node* next;

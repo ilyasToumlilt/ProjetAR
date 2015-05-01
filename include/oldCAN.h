@@ -4,21 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <mpi.h>
-
-typedef struct _point     point;
-typedef struct _space     space;
-typedef struct _node      node;
-typedef struct _list_node list_node;
-
-#define NB_DIRECTIONS 4
-
-#include <point.h>
-#include <space.h>
-#include <node.h>
-#include <list_node.h>
 
 /* for directions array */
+#define NB_DIRECTIONS 4
 #define NORTH     0
 #define SOUTH     1
 #define WEST      2
@@ -53,7 +41,10 @@ typedef struct _list_node list_node;
 #define FAILED_INSERT  16
 
 /* structs */
-
+typedef struct _point     point;
+typedef struct _space     space;
+typedef struct _node      node;
+typedef struct _list_node list_node;
 
 /* each CAN process has : */
 node* myNode; /* it's node */
@@ -62,5 +53,9 @@ node* myNode; /* it's node */
  * Operations
  ******************************************************************************/
 void CANinitialize();
+void CANinsert();
+int findInsertDirection(point* p, node* trg);
+int chooseDirectionRandomly(int direction);
+space* getNodesSubSpace(node* src);
 
 #endif
