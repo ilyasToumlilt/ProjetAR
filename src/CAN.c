@@ -79,7 +79,32 @@ void CANinsert()
       MPI_Send(&buf, 1, MPI_INT, INIT_NODE, DONE_INSERT,
 	       MPI_COMM_WORLD);
     } else {
+      /* recherche d'un node où je peux m'insérer, en commençant par
+	 le bootstrap */
+      int trg = BOOTSTRAP_NODE;
+      node tmpNode;
+
+      while(1){
+	/* demande d'insertion */
+	MPI_Send(&buf, 1, MPI_INT, trg, WANNA_INSERT, MPI_COMM_WORLD);
       
+	/* réponse */
+	MPI_Recv(&tmpNode, sizeof(node), MPI_BYTE, trg, TRY_INSERT,
+		 MPI_COMM_WORLD, &status);
+
+	/* traitement de la réponse : */
+	/* Je ne peux pas m'insérer si l'espace ne fait qu'un seul pixel */
+	if(tmpNode.area->south_west->x + 1 == tmpNode.area->north_east->x
+	   && tmpNode.area->south_west->y + 1 == tmpNode.area->north_east->y){
+	  tmpNode.id = -1;
+	  MPI_Send(&tmpNode, sizeof(node), MPI_BYTE, trg, TRYED_INSERT,
+		   MPI_COMM_WORLD);
+	  return;
+	}
+
+	/* suis-je dans l'espace du noeud ? */
+	
+      }
     }
   }
   
