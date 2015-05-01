@@ -13,11 +13,6 @@ typedef struct _list_node list_node;
 
 #define NB_DIRECTIONS 4
 
-#include <point.h>
-#include <space.h>
-#include <node.h>
-#include <list_node.h>
-
 /* for directions array */
 #define NORTH     0
 #define SOUTH     1
@@ -50,10 +45,6 @@ typedef struct _list_node list_node;
 #define REQUEST_INSERT  13
 
 /* structs */
-
-
-/* each CAN process has : */
-node* myNode; /* it's node */
 
 /*******************************************************************************
  * Operations

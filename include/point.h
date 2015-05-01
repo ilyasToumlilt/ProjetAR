@@ -13,13 +13,13 @@
 #ifndef __POINT_H__
 #define __POINT_H__
 
-#include <CAN.h>
-
 typedef struct _point point;
 struct _point {
   int x;
   int y;
 };
+
+#include <CAN.h>
 
 /*******************************************************************************
  * Constructor
@@ -31,13 +31,13 @@ struct _point {
  * @param y coordonnée verticale
  * @return le point alloué 
  */
-point* newPoint(int x, int y);
+point newPoint(int x, int y);
 /**
  * Constructeur d'un point avec des coordonnées aléatoires
  *
  * @return le point alloué
  */
-point* newRandomPoint();
+point newRandomPoint();
 /*******************************************************************************
  * Destructor
  ******************************************************************************/

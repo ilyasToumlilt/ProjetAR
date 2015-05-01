@@ -1,5 +1,13 @@
 #include <CAN.h>
 
+#include <point.h>
+#include <space.h>
+#include <node.h>
+#include <list_node.h>
+
+/* each CAN process has : */
+node myNode; /* it's node */
+
 /*******************************************************************************
  * Private Declaration
  ******************************************************************************/
@@ -96,9 +104,7 @@ void CANinsertBootstrap()
 void CANinsertNode()
 {
   /* allocation du noeud avec génération aléatoire des coordonnées */
-  myNode = newNode(idProcess,
-		   newRandomPoint(),
-		   NULL);
+  myNode = newNodeWithRandomPoint(idProcess);
 
   /* requete d'insertion -> bootstrap */
   MPI_Send(&myNode, sizeof(node), MPI_BYTE, BOOTSTRAP_NODE,
@@ -111,7 +117,7 @@ void CANinsertNode()
   
   /* notification du boss */
   int buf;
-  if(myNode->id == -1){
+  if(myNode.id == -1){
     MPI_Send(&buf, 1, MPI_INT, INIT_NODE, FAILED_INSERT, MPI_COMM_WORLD);
     return;
   }
@@ -121,7 +127,7 @@ void CANinsertNode()
 void CANhandleInsertRequest(node* n)
 {
   /* pour le test je ne fais qu'un print et j'accorde l'insertion */
-  printf("Node %d veut s'insérer dans %d\n", n->id, myNode->id);
+  printf("Node %d veut s'insérer dans %d\n", n->id, myNode.id);
 
   MPI_Send(n, sizeof(node), MPI_BYTE, n->id, REQUEST_INSERT, MPI_COMM_WORLD);
 

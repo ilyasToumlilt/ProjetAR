@@ -15,20 +15,23 @@
 #define __NODE_H__
 
 #include <CAN.h>
+#include <point.h>
+#include <space.h>
+#include <list_node.h>
 
 typedef struct _node node;
 struct _node {
   int id;
-  point* coord;
-  space* area;
+  point coord;
+  space area;
   list_node* neighbors[NB_DIRECTIONS];
 };
 
 /*******************************************************************************
  * Contructor
  ******************************************************************************/
-node* newNode(int id, point* coord, space* area);
-node* newNodeWithRandomPoint(int id);
+node newNode(int id, point coord, space area);
+node newNodeWithRandomPoint(int id);
 /*******************************************************************************
  * Destructor
  ******************************************************************************/

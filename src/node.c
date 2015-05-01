@@ -16,22 +16,23 @@
 /*******************************************************************************
  * Contructor
  ******************************************************************************/
-node* newNode(int id, point* coord, space* area)
+node newNode(int id, point coord, space area)
 {
-  node* ret = (node*)malloc(sizeof(node));
+  node ret;
 
-  ret->id = id;
-  ret->coord = coord;
-  ret->area = area;
+  ret.id = id;
+  ret.coord = coord;
+  ret.area = area;
   int i;
-  for(i=0; i<NB_DIRECTIONS;i++)
-    ret->neighbors[i] = NULL;
+  for(i=0; i<NB_DIRECTIONS; i++)
+    ret.neighbors[i]=NULL;
   return ret;
 }
 
-node* newNodeWithRandomPoint(int id)
+node newNodeWithRandomPoint(int id)
 {
-  return newNode(id, newRandomPoint(), NULL);
+  return newNode(id, newRandomPoint(), 
+		 newSpace(newRandomPoint(),newRandomPoint()));
 }
 
 /*******************************************************************************
@@ -39,8 +40,8 @@ node* newNodeWithRandomPoint(int id)
  ******************************************************************************/
 void freeNode(node* n)
 {
-  freePoint(n->coord);
-  freeSpace(n->area);
+  freePoint(&(n->coord));
+  freeSpace(&(n->area));
   int i;
   for(i=0; i<NB_DIRECTIONS; i++)
     freeListNode(n->neighbors[i]);
@@ -54,19 +55,19 @@ void freeNode(node* n)
  ******************************************************************************/
 int isNodeInCoord(node* src, int x1, int y1, int x2, int y2)
 {
-  return (src->coord->x >= x1 &&
-	  src->coord->x <  x2 &&
-	  src->coord->y >= y1 &&
-	  src->coord->y <  y2) ? 1 : 0;
+  return (src->coord.x >= x1 &&
+	  src->coord.x <  x2 &&
+	  src->coord.y >= y1 &&
+	  src->coord.y <  y2) ? 1 : 0;
 }
 
 int isNodeInSpace(node* src, space* sp)
 {
   return isNodeInCoord(src,
-		       sp->south_west->x,
-		       sp->south_west->y,
-		       sp->north_east->x,
-		       sp->north_east->y);
+		       sp->south_west.x,
+		       sp->south_west.y,
+		       sp->north_east.x,
+		       sp->north_east.y);
 }
 
 /*
@@ -74,13 +75,13 @@ int isNodeInSpace(node* src, space* sp)
  */
 int isNodeInNodesSpace(node* src, node* trg)
 {
-  return isNodeInSpace(src, trg->area);
+  return isNodeInSpace(src, &(trg->area));
 }
 
 int isPointInNodesSpace(point* p, node* n)
 {
-  return (p->x >= n->area->south_west->x &&
-	  p->x <  n->area->north_east->x &&
-	  p->y >= n->area->south_west->y &&
-	  p->y <  n->area->north_east->y) ? 1 : 0;
+  return (p->x >= n->area.south_west.x &&
+	  p->x <  n->area.north_east.x &&
+	  p->y >= n->area.south_west.y &&
+	  p->y <  n->area.north_east.y) ? 1 : 0;
 }

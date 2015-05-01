@@ -18,7 +18,7 @@
 
 typedef struct _list_node list_node;
 struct _list_node {
-  node* n;
+  int id;
   list_node* next;
 };
 
@@ -32,7 +32,7 @@ struct _list_node {
  * @param next le noeud suivant
  * @return liste_node* l'element alloué.
  */
-list_node* newListNode(node* n, list_node* next);
+list_node* newListNode(int id, list_node* next);
 
 /*******************************************************************************
  * Destructors
@@ -54,7 +54,7 @@ void freeListNode(list_node* ln);
  * @param ln adresse de la liste 
  * @param n le noeud à empiler
  */
-void pushNodeToListNode(list_node** ln, node* n);
+void pushNodeToListNode(list_node** ln, int id);
 
 /**
  * Dépile un élement ( le premier ) de la liste
@@ -62,7 +62,7 @@ void pushNodeToListNode(list_node** ln, node* n);
  * @param ln adresse de la liste
  * @return le noeud dépilé, NULL si liste vide
  */
-node* popNodeFromListNode(list_node** ln);
+int popNodeFromListNode(list_node** ln);
 
 /**
  * Dépile l'element d'identidiant id de la liste.
@@ -71,7 +71,7 @@ node* popNodeFromListNode(list_node** ln);
  * @param id l'identifiant du noeud à dépiler.
  * @return le noeud dépilé
  */
-node* popNodeFromListNodeById(list_node** ln, int id);
+int popNodeFromListNodeById(list_node** ln, int id);
 
 /**
  * Produit une copie de la liste de noeuds passée en params

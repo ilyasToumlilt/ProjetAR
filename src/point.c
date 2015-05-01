@@ -22,11 +22,11 @@
  * @param y coordonnée verticale dans [COORD_MIN_Y, COORD_MAX_Y[
  * @return le point alloué 
  */
-point* newPoint(int x, int y)
+point newPoint(int x, int y)
 {
-  point* ret = (point*)malloc(sizeof(point));
-  ret->x = x;
-  ret->y = y;
+  point ret;
+  ret.x = x;
+  ret.y = y;
 
   return ret;
 }
@@ -36,7 +36,7 @@ point* newPoint(int x, int y)
  *
  * @return le point alloué
  */
-point* newRandomPoint()
+point newRandomPoint()
 {
   /* @todo ne pas oublier le srand() */
   return newPoint((rand()%COORD_MAX_X)+COORD_MIN_X, 

@@ -15,17 +15,17 @@
 /*******************************************************************************
  * Constructors
  ******************************************************************************/
-space* newSpace(point* south_west, point* north_east) 
+space newSpace(point south_west, point north_east) 
 {
-  space* ret = (space*)malloc(sizeof(space));
+  space ret;
 
-  ret->south_west = south_west;
-  ret->north_east = north_east;
+  ret.south_west = south_west;
+  ret.north_east = north_east;
 
   return ret;
 }
 
-space* newSpaceWithCoord(int x_sw, int y_sw, int x_ne, int y_ne)
+space newSpaceWithCoord(int x_sw, int y_sw, int x_ne, int y_ne)
 {
   return newSpace(newPoint(x_sw, y_sw), newPoint(x_ne, y_ne));
 }
@@ -35,8 +35,8 @@ space* newSpaceWithCoord(int x_sw, int y_sw, int x_ne, int y_ne)
  ******************************************************************************/
 void freeSpace(space* sp)
 {
-  freePoint(sp->south_west);
-  freePoint(sp->north_east);
+  freePoint(&(sp->south_west));
+  freePoint(&(sp->north_east));
   free(sp);
 
   return;

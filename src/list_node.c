@@ -24,10 +24,10 @@
  * @param next le noeud suivant
  * @return liste_node* l'element alloué.
  */
-list_node* newListNode(node* n, list_node* next)
+list_node* newListNode(int id, list_node* next)
 {
   list_node* ret = (list_node*)malloc(sizeof(list_node));
-  ret->n = n;
+  ret->id = id;
   ret->next = next;
   return ret;
 }
@@ -61,9 +61,9 @@ void freeListNode(list_node* ln)
  * @param ln adresse de la liste 
  * @param n le noeud à empiler
  */
-void pushNodeToListNode(list_node** ln, node* n)
+void pushNodeToListNode(list_node** ln, int id)
 {
-  *(ln) = newListNode(n, *(ln));
+  *(ln) = newListNode(id, *(ln));
   return;
 }
 
@@ -73,14 +73,14 @@ void pushNodeToListNode(list_node** ln, node* n)
  * @param ln adresse de la liste
  * @return le noeud dépilé, NULL si liste vide
  */
-node* popNodeFromListNode(list_node** ln)
+int popNodeFromListNode(list_node** ln)
 {
-  node* ret = NULL;
+  int ret = -1;
   if( (*ln) ){
     list_node* first = *(ln);
     *(ln) = first->next;
     first->next = NULL;
-    ret = first->n;
+    ret = first->id;
     freeListNode(first);
   }
   return ret;
@@ -93,13 +93,13 @@ node* popNodeFromListNode(list_node** ln)
  * @param id l'identifiant du noeud à dépiler.
  * @return le noeud dépilé
  */
-node* popNodeFromListNodeById(list_node** ln, int id)
+int popNodeFromListNodeById(list_node** ln, int id)
 {
-  node* ret = NULL;
+  int ret = -1;
   if( (*ln) ){
     list_node **tmp = ln;
     while( *(tmp) ){
-      if( (*tmp)->n->id == id ){
+      if( (*tmp)->id == id ){
 	ret = popNodeFromListNode(tmp);
 	break;
       }
@@ -119,7 +119,7 @@ list_node* cloneListNode(list_node* ln)
 {
   if( !ln )
     return NULL;
-  return newListNode(ln->n, cloneListNode(ln->next));
+  return newListNode(ln->id, cloneListNode(ln->next));
 }
 
 /*******************************************************************************
@@ -135,7 +135,7 @@ void printListNode(list_node* ln)
   if( !ln ){
     printf("->[]\n");
   } else {
-    printf("->[%d]", ln->n->id);
+    printf("->[%d]", ln->id);
     printListNode(ln->next);
   }
   

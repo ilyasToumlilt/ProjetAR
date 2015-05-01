@@ -13,19 +13,21 @@
 #ifndef __SPACE_H__
 #define __SPACE_H__
 
-#include <CAN.h>
+#include <point.h>
 
 typedef struct _space space;
 struct _space{
-  point* south_west;
-  point* north_east;
+  point south_west;
+  point north_east;
 };
+
+#include <CAN.h>
 
 /*******************************************************************************
  * Constructors
  ******************************************************************************/
-space* newSpace(point* south_west, point* north_east);
-space* newSpaceWithCoord(int x_sw, int y_sw, int x_ne, int y_ne);
+space newSpace(point south_west, point north_east);
+space newSpaceWithCoord(int x_sw, int y_sw, int x_ne, int y_ne);
 
 /*******************************************************************************
  * Destructor
