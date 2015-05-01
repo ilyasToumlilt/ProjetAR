@@ -14,7 +14,9 @@ node myNode; /* it's node */
 void CANinsertInit();
 void CANinsertBootstrap();
 void CANinsertNode();
-void CANhandleInsertRequest();
+void CANhandleInsertRequest(node* n);
+int findInsertDirection(point* p, node* trg);
+int chooseDirectionRandomly(int direction);
 
 /*******************************************************************************
  * Initialization
@@ -103,6 +105,12 @@ void CANinsertBootstrap()
 
 void CANinsertNode()
 {
+  /* attente d'autorisation du boss */
+  int buf;
+  MPI_Status status;
+  MPI_Recv(&buf, 1, MPI_INT, INIT_NODE, U_CAN_INSERT,
+	   MPI_COMM_WORLD, &status);
+
   /* allocation du noeud avec génération aléatoire des coordonnées */
   myNode = newNodeWithRandomPoint(idProcess);
 
@@ -111,12 +119,10 @@ void CANinsertNode()
 	   REQUEST_INSERT, MPI_COMM_WORLD);
 
   /* attente de réponse */
-  MPI_Status status;
   MPI_Recv(&myNode, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
 	   REQUEST_INSERT, MPI_COMM_WORLD, &status);
   
   /* notification du boss */
-  int buf;
   if(myNode.id == -1){
     MPI_Send(&buf, 1, MPI_INT, INIT_NODE, FAILED_INSERT, MPI_COMM_WORLD);
     return;
@@ -126,11 +132,36 @@ void CANinsertNode()
 
 void CANhandleInsertRequest(node* n)
 {
-  /* pour le test je ne fais qu'un print et j'accorde l'insertion */
-  printf("Node %d veut s'insérer dans %d\n", n->id, myNode.id);
+  /* @todo si mon espace ne fait qu'un seul pixel, l'insertion est impossible */
 
-  MPI_Send(n, sizeof(node), MPI_BYTE, n->id, REQUEST_INSERT, MPI_COMM_WORLD);
+  printf("[%d] is handling insert request from %d\n", idProcess, n->id);
+  fflush(NULL);
+  /* le noeud fait-il partie de mon espace ? */
+  if( isPointInNodesSpace(&(n->coord), &myNode) ){
+    /* si oui, je lui donne d'abord son sous espace */
+    n->area = splitNodesSpace(&myNode);
 
+    /* si je ne suis pas dans mon sous-espace je retire une nouvelle 
+       valeur dedans ... */
+    if( !isPointInNodesSpace(&(n->coord), n) ){
+      n->coord.x = (rand()%n->area.north_east.x) + n->area.south_west.x;
+      n->coord.y = (rand()%n->area.north_east.y) + n->area.south_west.y;
+    }
+
+    /* insertion done */
+    MPI_Send(n, sizeof(node), MPI_BYTE, n->id, REQUEST_INSERT, MPI_COMM_WORLD);
+  }
+  else {
+    /* redirection d'insertion */
+    int trg = findInsertDirection(&(n->coord), &myNode);
+    if( trg >= NB_DIRECTIONS )
+      trg = chooseDirectionRandomly(trg);
+    printf("HELLO\n");
+    MPI_Send(n, sizeof(node), MPI_BYTE, myNode.neighbors[trg]->id, 
+	     REQUEST_INSERT, MPI_COMM_WORLD);
+    printf("OLLEH\n");
+  }
+  
   return;
 }
 /*******************************************************************************
@@ -141,9 +172,13 @@ void CANhandleMessage()
   node buf;
   MPI_Status status;
 
+  printf("%d waiting for message\n", myNode.id);
+
   /* waiting for message */
   MPI_Recv(&buf, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
 	   MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+
+  printf("%d handled %d message\n", myNode.id, buf.id);
 
   switch(status.MPI_TAG)
     {
@@ -152,4 +187,51 @@ void CANhandleMessage()
     }
 
   return;
+}
+
+/*******************************************************************************
+ * Other Operations 
+ ******************************************************************************/
+int findInsertDirection(point* p, node* trg)
+{
+  if( p->x >= trg->area.north_east.x &&
+      p->y >= trg->area.south_west.y &&
+      p->y <  trg->area.north_east.y )
+    return EAST;
+  if( p->x >= trg->area.south_west.x &&
+      p->x <  trg->area.north_east.x  &&
+      p->y <  trg->area.south_west.y)
+    return SOUTH;
+  if( p->x <  trg->area.south_west.x &&
+      p->y >= trg->area.south_west.y &&
+      p->y <  trg->area.north_east.y )
+    return WEST;
+  if( p->x >= trg->area.south_west.x &&
+      p->x <  trg->area.north_east.x  &&
+      p->y >= trg->area.north_east.y )
+    return NORTH;
+  if(p->x >= trg->area.north_east.x &&
+     p->y >= trg->area.north_east.y)
+    return NORTHEAST;
+  if(p->x <  trg->area.south_west.x &&
+     p->y >= trg->area.north_east.y)
+    return NORTHWEST;
+  if(p->x >= trg->area.north_east.x &&
+     p->y <  trg->area.south_west.y)
+    return SOUTHEAST;
+  return SOUTHWEST;
+}
+
+int chooseDirectionRandomly(int direction)
+{
+  switch(direction){
+  case NORTHWEST:
+    return (rand()%2) ? NORTH : WEST;
+  case NORTHEAST:
+    return (rand()%2) ? NORTH : EAST;
+  case SOUTHWEST:
+    return (rand()%2) ? SOUTH : WEST;
+  default:
+    return (rand()%2) ? SOUTH : EAST;
+  }
 }

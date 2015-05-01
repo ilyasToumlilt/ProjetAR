@@ -12,7 +12,7 @@ LIB=lib
 OBJ=obj
 SRC=src
 
-all: directories can
+all: directories can main
 
 
 directories: ${OBJ} ${BIN} ${LIB}

@@ -141,12 +141,7 @@ void CANinsert()
   
 }
 
-
-/*
- * @todo si je peux me passer de cette merde ..
- * @todo cette merde est largement optimisable 
- */
-space* getNodesSubSpace(node* src)
+space getNodesSubSpace(node* src)
 {
   int width  = src->area->north_east->x - src->area->south_west->x;
   int height = src->area->north_east->y - src->area->south_west->y;

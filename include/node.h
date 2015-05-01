@@ -43,5 +43,7 @@ int isNodeInCoord(node* src, int x1, int y1, int x2, int y2);
 int isNodeInSpace(node* src, space* sp);                      /* not used */
 int isNodeInNodesSpace(node* src, node* trg);                 /* not used */
 int isPointInNodesSpace(point* p, node* n);
+space getNodesSubSpace(node* src);
+space splitNodesSpace(node* src);
 
 #endif

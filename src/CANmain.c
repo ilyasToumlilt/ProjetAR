@@ -10,8 +10,12 @@ int main(int argc, char** argv)
   /* insert */
   CANinsert();
 
+  /* myId */
+  int myId;
+  MPI_Comm_rank(MPI_COMM_WORLD, &myId);
+
   /* message handling */
-  printf("message Handling :)\n");
+  printf("%d -> message Handling :)\n", myId);
   while(1){
     CANhandleMessage();
   }

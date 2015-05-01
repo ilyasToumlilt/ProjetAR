@@ -85,3 +85,75 @@ int isPointInNodesSpace(point* p, node* n)
 	  p->y >= n->area.south_west.y &&
 	  p->y <  n->area.north_east.y) ? 1 : 0;
 }
+
+space getNodesSubSpace(node* src)
+{
+  int width  = src->area.north_east.x - src->area.south_west.x;
+  int height = src->area.north_east.y - src->area.south_west.y;
+  
+  if( height > width ){
+    if( isNodeInCoord(src, src->area.south_west.x, src->area.south_west.y,
+		      src->area.north_east.x, src->area.south_west.y + (height/2)) ){
+      return newSpaceWithCoord(src->area.south_west.x,
+			       src->area.south_west.y + (height/2),
+			       src->area.north_east.x,
+			       src->area.north_east.y);
+    } else {
+      return newSpaceWithCoord(src->area.south_west.x,
+			       src->area.south_west.y,
+			       src->area.north_east.x,
+			       src->area.south_west.y + (height/2));
+    }
+  } else {
+     if( isNodeInCoord(src, src->area.south_west.x, src->area.south_west.y,
+		       src->area.south_west.x + (width/2), src->area.north_east.y) ){
+       return newSpaceWithCoord(src->area.south_west.x + (width/2),
+				src->area.south_west.y,
+				src->area.north_east.x,
+				src->area.north_east.y);
+     } else {
+       return newSpaceWithCoord(src->area.south_west.x,
+				src->area.south_west.y,
+				src->area.south_west.x + (width/2),
+				src->area.north_east.y);
+    }
+  }
+}
+
+space splitNodesSpace(node* src)
+{
+  int width  = src->area.north_east.x - src->area.south_west.x;
+  int height = src->area.north_east.y - src->area.south_west.y;
+
+  if( height > width ){
+    if( isNodeInCoord(src, src->area.south_west.x, src->area.south_west.y,
+		      src->area.north_east.x, src->area.south_west.y + (height/2)) ){
+      src->area.north_east.y = src->area.south_west.y + (height/2);
+      return newSpaceWithCoord(src->area.south_west.x,
+			       src->area.north_east.y,
+			       src->area.north_east.x,
+			       src->area.north_east.y + (height/2));
+    } else {
+      src->area.south_west.y += (height/2);
+      return newSpaceWithCoord(src->area.south_west.x,
+			       src->area.south_west.y - (height/2),
+			       src->area.north_east.x,
+			       src->area.south_west.y);
+    }
+  } else {
+     if( isNodeInCoord(src, src->area.south_west.x, src->area.south_west.y,
+		       src->area.south_west.x + (width/2), src->area.north_east.y) ){
+       src->area.north_east.x -= (width/2);
+       return newSpaceWithCoord(src->area.north_east.x,
+				src->area.south_west.y,
+				src->area.north_east.x + (width/2),
+				src->area.north_east.y);
+     } else {
+       src->area.south_west.x += (width/2);
+       return newSpaceWithCoord(src->area.south_west.x - (width/2),
+				src->area.south_west.y,
+				src->area.south_west.x,
+				src->area.north_east.y);
+    }
+  }
+}
