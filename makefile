@@ -30,13 +30,16 @@ $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) -c -o $@ $< -I$(INC)
 
 $(BIN)/% : $(OBJ)/%.o
-	$(CC) -o $@ $< ${LPTHREAD}
+	$(CC) -o $@ $< ${LPTHREAD} -L$(LIB) -lCAN
 #fin regles generales
 
 $(LIB)/libCAN.a: $(OBJ)/point.o $(OBJ)/space.o $(OBJ)/node.o $(OBJ)/list_node.o $(OBJ)/CAN.o
 	ar -rcs $@ $^
 
 can: $(LIB)/libCAN.a
+
+main: can $(BIN)/CANmain
+	mpirun -np 5 $(BIN)/CANmain
 
 clean:
 	rm -f ${OBJ}/* ${BIN}/* ${LIB}/*

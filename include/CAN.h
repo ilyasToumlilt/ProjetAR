@@ -44,13 +44,10 @@ typedef struct _list_node list_node;
  * MPI tags definition
  ******************************************************************************/
 /* Insert tags */
-#define U_CAN_INSERT   10
-#define DONE_INSERT    11
-#define WANNA_INSERT   12
-#define TRY_INSERT     13
-#define TRYED_INSERT   14
-#define CANNOT_INSERT  15
-#define FAILED_INSERT  16
+#define U_CAN_INSERT    10
+#define DONE_INSERT     11
+#define FAILED_INSERT   12
+#define REQUEST_INSERT  13
 
 /* structs */
 
@@ -62,5 +59,7 @@ node* myNode; /* it's node */
  * Operations
  ******************************************************************************/
 void CANinitialize();
+void CANinsert();
+void CANhandleMessage();
 
 #endif
