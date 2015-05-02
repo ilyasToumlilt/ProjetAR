@@ -20,8 +20,14 @@ void CANinsertInit();
 void CANinsertBootstrap();
 void CANinsertNode();
 void CANhandleInsertRequest(node* n);
+void CANhandleAddNeighbor(node* n);
+void CANhandleRmvNeighbor(node* n);
+void CANhandleInfoRequest(node* n);
 int findInsertDirection(point* p, node* trg);
 int chooseDirectionRandomly(int direction);
+void updateNeighbors(int dir, node* n);
+void recalculateNeighborsForDirection(int dir, node* n);
+int isNodeNeighbor(int dir, node* src, node* trg);
 
 /*******************************************************************************
  * Initialization
@@ -153,6 +159,9 @@ void CANhandleInsertRequest(node* n)
       n->coord.y = (rand()%n->area.north_east.y) + n->area.south_west.y;
     }
 
+    /* update des voisins */
+    updateNeighbors(findInsertDirection(&(n->coord), &myNode), n);
+
     /* insertion done */
     MPI_Send(n, sizeof(node), MPI_BYTE, n->id, REQUEST_INSERT, MPI_COMM_WORLD);
   }
@@ -161,10 +170,9 @@ void CANhandleInsertRequest(node* n)
     int trg = findInsertDirection(&(n->coord), &myNode);
     if( trg >= NB_DIRECTIONS )
       trg = chooseDirectionRandomly(trg);
-    printf("HELLO\n");
+
     MPI_Send(n, sizeof(node), MPI_BYTE, myNode.neighbors[trg].idList[0], 
 	     REQUEST_INSERT, MPI_COMM_WORLD);
-    printf("OLLEH\n");
   }
   
   return;
@@ -188,12 +196,38 @@ void CANhandleMessage()
   switch(status.MPI_TAG)
     {
     case REQUEST_INSERT: CANhandleInsertRequest(&buf); break;
+    case ADD_NEIGHBOR: CANhandleAddNeighbor(&buf); break;
+    case RMV_NEIGHBOR: CANhandleRmvNeighbor(&buf); break;
+    case INFO_REQUEST: CANhandleInfoRequest(&buf); break;
     default: break;
     }
 
   return;
 }
 
+void CANhandleAddNeighbor(node* n)
+{
+  pushNodeToListNode(&(n->neighbors[findInsertDirection(&(n->coord), &myNode)]),
+		     n->id);
+
+  int buf;
+  MPI_Send(&buf, 1, MPI_INT, n->id, ADD_NEIGHBOR_ACK, MPI_COMM_WORLD);
+}
+
+void CANhandleRmvNeighbor(node* n)
+{
+  popNodeFromListNodeById(&(n->neighbors[findInsertDirection(&(n->coord), &myNode)])
+			  , n->id);
+
+  int buf;
+  MPI_Send(&buf, 1, MPI_INT, n->id, RMV_NEIGHBOR_ACK, MPI_COMM_WORLD);
+}
+
+void CANhandleInfoRequest(node* n)
+{
+  MPI_Send(&myNode, sizeof(node), MPI_BYTE, n->id, INFO_REQUEST_ACK,
+	   MPI_COMM_WORLD);
+}
 /*******************************************************************************
  * Other Operations 
  ******************************************************************************/
@@ -259,15 +293,53 @@ void updateNeighbors(int dir, node* n)
   n->neighbors[(dir+2)%NB_DIRECTIONS].size = 1;
   /* pour les deux directions restantes il faudra recalculer par 
      rapport aux limites */
-  for(i=0; i<myNode.neighbors[(dir+1)])
+  recalculateNeighborsForDirection((dir+1)%NB_DIRECTIONS, n);
+  recalculateNeighborsForDirection((dir+3)%NB_DIRECTIONS, n);
   
   return;
 }
 
 void recalculateNeighborsForDirection(int dir, node* n)
 {
-  int i;
-  for(i=0; i<newNode.neighbors[dir].size; i++){
-    
+  int i, tmp;
+  node buf;
+  MPI_Status status;
+  for(i=0; i<myNode.neighbors[dir].size; i++){
+    MPI_Send(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[dir].idList[i],
+	     INFO_REQUEST, MPI_COMM_WORLD);
+    MPI_Recv(&buf, sizeof(node), MPI_BYTE, myNode.neighbors[dir].idList[i],
+	     INFO_REQUEST_ACK, MPI_COMM_WORLD, &status);
+    if( !isNodeNeighbor(dir, &myNode, &buf) ){
+      popNodeFromListNodeById(&(n->neighbors[dir]), buf.id);
+      i--;
+      MPI_Send(&myNode, sizeof(node), MPI_BYTE, buf.id, RMV_NEIGHBOR,
+	       MPI_COMM_WORLD);
+      MPI_Recv(&tmp, 1, MPI_INT, buf.id, RMV_NEIGHBOR_ACK,
+	       MPI_COMM_WORLD, &status);
+    }
+    if( isNodeNeighbor(dir, n, &buf) ){
+      pushNodeToListNode(&(n->neighbors[dir]), buf.id);
+      MPI_Send(&n, sizeof(node), MPI_BYTE, buf.id, ADD_NEIGHBOR,
+	       MPI_COMM_WORLD);
+      MPI_Recv(&tmp, 1, MPI_INT, buf.id, ADD_NEIGHBOR_ACK,
+	       MPI_COMM_WORLD, &status);
+    }
   }
+  return;
+}
+
+/* is trg src's neighbor in dir direction ? */
+int isNodeNeighbor(int dir, node* src, node* trg)
+{
+  if( dir == NORTH || dir == SOUTH ){
+    if(trg->area.south_west.x < src->area.north_east.x ||
+       trg->area.north_east.x > src->area.south_west.x )
+      return 1;
+  }
+  else {
+    if(trg->area.south_west.y < src->area.north_east.y ||
+       trg->area.north_east.y > src->area.south_west.y)
+      return 1;
+  }
+  return 0;
 }

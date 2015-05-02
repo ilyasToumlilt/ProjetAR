@@ -39,10 +39,18 @@ typedef struct _list_node list_node;
  * MPI tags definition
  ******************************************************************************/
 /* Insert tags */
-#define U_CAN_INSERT    10
-#define DONE_INSERT     11
-#define FAILED_INSERT   12
-#define REQUEST_INSERT  13
+#define U_CAN_INSERT     10
+#define DONE_INSERT      11
+#define FAILED_INSERT    12
+#define REQUEST_INSERT   13
+
+#define ADD_NEIGHBOR     20
+#define ADD_NEIGHBOR_ACK 21
+#define RMV_NEIGHBOR     22
+#define RMV_NEIGHBOR_ACK 23
+
+#define INFO_REQUEST     90
+#define INFO_REQUEST_ACK 91
 
 
 
