@@ -16,8 +16,10 @@
 
 #include <CAN.h>
 #include <point.h>
+#include <data.h>
 #include <space.h>
 #include <list_node.h>
+#include <list_data.h>
 
 typedef struct _node node;
 struct _node {
@@ -25,6 +27,7 @@ struct _node {
   point coord;
   space area;
   list_node neighbors[NB_DIRECTIONS]; /* @todo borne max largement améliorable */
+  list_data ld;
 };
 
 /*******************************************************************************

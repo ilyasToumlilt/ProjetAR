@@ -15,9 +15,11 @@
 #define __LIST_DATA_H__
 
 #include <CAN.h>
+#include <data.h>
 
+typedef struct _list_data list_data;
 struct _list_data {
-  data* d;
+  data d;
   list_data* next;
 };
 
@@ -31,7 +33,7 @@ struct _list_data {
  * @param next la donnée suivant
  * @return liste_data* l'element alloué.
  */
-list_data* newListData(data* d, list_data* next);
+list_data newListData();
 
 /*******************************************************************************
  * Destructors
@@ -53,24 +55,6 @@ void freeListData(list_data* ld);
  * @param ld adresse de la liste 
  * @param d la donnée à empiler
  */
-void pushDataToListData(list_data** ld, data* d);
-
-/**
- * Produit une copie de la liste de données passée en params
- *
- * @param ld liste de datas à copier
- * @return copie de la liste
- */
-list_data* cloneListData(list_data* ld);
-
-/*******************************************************************************
- * Views
- ******************************************************************************/
-/**
- * Imprime le contenu de la liste ( valeur des données ) sur STDOUT
- *
- * @param ld la liste de data à imprimer
- */
-void printListData(list_data* ld);
+list_data pushDataToListData(data d, list_data listData);
 
 #endif
