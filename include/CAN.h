@@ -15,8 +15,8 @@ typedef struct _list_node list_node;
 
 /* for directions array */
 #define NORTH     0
-#define SOUTH     1
-#define WEST      2
+#define WEST      1
+#define SOUTH     2
 #define EAST      3
 #define NORTHWEST 4
 #define NORTHEAST 5
@@ -44,7 +44,7 @@ typedef struct _list_node list_node;
 #define FAILED_INSERT   12
 #define REQUEST_INSERT  13
 
-/* structs */
+
 
 /*******************************************************************************
  * Operations
@@ -52,5 +52,7 @@ typedef struct _list_node list_node;
 void CANinitialize();
 void CANinsert();
 void CANhandleMessage();
+
+node getNode();
 
 #endif

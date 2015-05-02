@@ -8,6 +8,11 @@
 /* each CAN process has : */
 node myNode; /* it's node */
 
+node getNode()
+{
+  return myNode;
+}
+
 /*******************************************************************************
  * Private Declaration
  ******************************************************************************/
@@ -233,5 +238,36 @@ int chooseDirectionRandomly(int direction)
     return (rand()%2) ? SOUTH : WEST;
   default:
     return (rand()%2) ? SOUTH : EAST;
+  }
+}
+
+/* dir : insert direction
+   n : new inserted node 
+*/ 
+void updateNeighbors(int dir, node* n)
+{
+  int i;
+  /* le nouveau prend tous mes voisin de sa direction d'insert */ 
+  for(i=0; i<myNode.neighbors[dir].size; i++)
+    n->neighbors[dir].idList[i]=myNode.neighbors[dir].idList[i];
+  n->neighbors[dir].size = myNode.neighbors[dir].size;
+  /* et devient mon unique voisin dans cette direction */
+  myNode.neighbors[dir].idList[0] = n->id;
+  myNode.neighbors[dir].size = 1;
+  /* je suis également son unique voisin dans la direction opposée */
+  n->neighbors[(dir+2)%NB_DIRECTIONS].idList[0] = myNode.id;
+  n->neighbors[(dir+2)%NB_DIRECTIONS].size = 1;
+  /* pour les deux directions restantes il faudra recalculer par 
+     rapport aux limites */
+  for(i=0; i<myNode.neighbors[(dir+1)])
+  
+  return;
+}
+
+void recalculateNeighborsForDirection(int dir, node* n)
+{
+  int i;
+  for(i=0; i<newNode.neighbors[dir].size; i++){
+    
   }
 }
