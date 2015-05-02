@@ -11,7 +11,7 @@
  */
 
 #include <point.h>
-
+#include <time.h>
 /*******************************************************************************
  * Constructor
  ******************************************************************************/
@@ -38,6 +38,7 @@ point newPoint(int x, int y)
  */
 point newRandomPoint()
 {
+	srand(time(NULL));
   /* @todo ne pas oublier le srand() */
   return newPoint((rand()%COORD_MAX_X)+COORD_MIN_X, 
 		  (rand()%COORD_MAX_Y)+COORD_MIN_Y);

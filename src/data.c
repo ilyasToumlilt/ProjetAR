@@ -21,7 +21,6 @@ data newData(point coord)
 
   ret.val = coord.x+coord.y;
   ret.coord = coord;
-  
   return ret;
 }
 

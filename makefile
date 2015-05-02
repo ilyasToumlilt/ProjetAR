@@ -33,14 +33,14 @@ $(BIN)/% : $(OBJ)/%.o
 	$(CC) -o $@ $< ${LPTHREAD} -L$(LIB) -lCAN
 #fin regles generales
 
-$(LIB)/libCAN.a: $(OBJ)/point.o $(OBJ)/space.o $(OBJ)/node.o $(OBJ)/data.o $(OBJ)/list_node.o $(OBJ)/list_data.o $(OBJ)/CAN.o $(OBJ)/CANinsertData.o
+$(LIB)/libCAN.a: $(OBJ)/point.o $(OBJ)/space.o $(OBJ)/node.o $(OBJ)/data.o $(OBJ)/list_node.o $(OBJ)/display.o $(OBJ)/CAN.o $(OBJ)/CANinsertData.o $(OBJ)/CANsearchData.o
 	ar -rcs $@ $^
 
 can: $(LIB)/libCAN.a
 
 main: can $(BIN)/CANmain
-	mpirun -np 5 $(BIN)/CANmain
-
+	mpirun -np 4 $(BIN)/CANmain
+	
 clean:
 	rm -f ${OBJ}/* ${BIN}/* ${LIB}/*
 

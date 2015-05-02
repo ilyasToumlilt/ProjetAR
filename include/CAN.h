@@ -24,6 +24,7 @@ typedef struct _list_node list_node;
 #define SOUTHEAST 7
 
 #define N 10
+#define MAX_DATA 100
 
 /* coord limits */
 #define COORD_MIN_X 0
@@ -39,18 +40,31 @@ typedef struct _list_node list_node;
  * MPI tags definition
  ******************************************************************************/
 /* Insert tags */
-#define U_CAN_INSERT     10
-#define DONE_INSERT      11
-#define FAILED_INSERT    12
-#define REQUEST_INSERT   13
+#define U_CAN_INSERT     	10
+#define DONE_INSERT      	11
+#define FAILED_INSERT    	12
+#define REQUEST_INSERT   	13
 
-#define ADD_NEIGHBOR     20
-#define ADD_NEIGHBOR_ACK 21
-#define RMV_NEIGHBOR     22
-#define RMV_NEIGHBOR_ACK 23
+#define ADD_NEIGHBOR     	20
+#define ADD_NEIGHBOR_ACK 	21
+#define RMV_NEIGHBOR     	22
+#define RMV_NEIGHBOR_ACK 	23
 
-#define INFO_REQUEST     90
-#define INFO_REQUEST_ACK 91
+#define INFO_REQUEST     	90
+#define INFO_REQUEST_ACK 	91
+
+#define DONE_INSERT_DATA     100
+#define REQUEST_INSERT_DATA  101
+
+#define DONE_SEARCH_DATA    200
+#define FAILED_SEARCH_DATA 	201
+#define REQUEST_SEARCH_DATA 202
+
+#define END 				900
+
+/* Display */
+#define WANT_INFO   		300
+#define GIVE_INFO			301
 
 
 
@@ -59,12 +73,13 @@ typedef struct _list_node list_node;
  ******************************************************************************/
 void CANinitialize();
 void CANinsert();
-void CANhandleMessage();
-
+int CANhandleMessage();
+void CANend();
 
 int findInsertDirection(point* p, node* trg);
 int chooseDirectionRandomly(int direction);
 
 node getNode();
+void setNode();
 
 #endif

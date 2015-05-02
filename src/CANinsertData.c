@@ -9,30 +9,29 @@
 /*******************************************************************************
  * Private Declaration
  ******************************************************************************/
-void CANinsertDataInit();
-void CANinsertDataNode();
-void CANhandleInsertDataRequest(data* n);
 void gestionStockage(int indexData, data d);
 
 data lastInsert[NB_STOCKAGE];
 data firstInsert[NB_STOCKAGE];
+data* getLastInsert(){ return lastInsert;}
+data* getFirstInsert(){ return firstInsert;}
 
 void CANinsertDataInit()
 {
   int buf, i;
   MPI_Status status;
 
-  for(i=0; i<NB_DATA; i++){
-  	/* Création de la data */
-  	data d = newData(newRandomPoint());
+  for(i=0; i<10; i++){
+    /* Création de la data */
+    data d = newData(newRandomPoint());
+    printf("x: %d, y: %d\n",d.coord.x, d.coord.y);
 
     /* On  demande d'inserer la data*/
     MPI_Send(&d, sizeof(data), MPI_BYTE, BOOTSTRAP_NODE, REQUEST_INSERT_DATA, MPI_COMM_WORLD);
-      
+
     /* Attente de bonne insertion de la data */
     MPI_Recv(&buf, 1, MPI_INT, BOOTSTRAP_NODE, MPI_ANY_TAG,
-	       MPI_COMM_WORLD, &status);
-
+         MPI_COMM_WORLD, &status);
     gestionStockage(i, d);
   }
 }
@@ -46,8 +45,11 @@ void CANhandleInsertDataRequest(data* d)
   fflush(NULL);
   /* la data fait-il partie de mon espace ? */
   if( isPointInNodesSpace(&(d->coord), &n) ){
+
     /* si oui, j'ajoute ls data a la liste de mon noeud */
-    /* @TODO: Ajouter a la iste de data du node */
+    n.ld[n.nbData] = *d;
+    n.nbData++;
+    setNode(n);
 
     /* insertion reussie done */
     MPI_Send(&buf, 1, MPI_INT, INIT_NODE, DONE_INSERT_DATA, MPI_COMM_WORLD);
@@ -58,8 +60,8 @@ void CANhandleInsertDataRequest(data* d)
     if( trg >= NB_DIRECTIONS )
       trg = chooseDirectionRandomly(trg);
     
-	    MPI_Send(d, sizeof(data), MPI_BYTE, n.neighbors[trg].idList[0], 
-		     REQUEST_INSERT_DATA, MPI_COMM_WORLD);
+      MPI_Send(d, sizeof(data), MPI_BYTE, n.neighbors[trg].idList[0], 
+         REQUEST_INSERT_DATA, MPI_COMM_WORLD);
     
   }
   
@@ -68,15 +70,15 @@ void CANhandleInsertDataRequest(data* d)
 
 void gestionStockage(int indexData, data d)
 {
-	int j;
+  int j;
     if(indexData < NB_STOCKAGE){
-    	firstInsert[indexData] = d;
+      firstInsert[indexData] = d;
     }
     /* Decallage lastInsert */
     for (j = 0; j < NB_STOCKAGE-1; ++j)
     {
-    	lastInsert[j+1] = lastInsert[j];
+      lastInsert[j+1] = lastInsert[j];
     }
     lastInsert[0] = d;
-	return;
+  return;
 }

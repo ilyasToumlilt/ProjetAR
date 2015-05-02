@@ -1,8 +1,11 @@
 #include <CAN.h>
+#include <CANinsertData.h>
+#include <display.h>
 
 #include <point.h>
 #include <space.h>
 #include <node.h>
+#include <data.h>
 #include <list_node.h>
 
 /* each CAN process has : */
@@ -11,6 +14,11 @@ node myNode; /* it's node */
 node getNode()
 {
   return myNode;
+}
+
+void setNode(node n)
+{
+  myNode = n;
 }
 
 /*******************************************************************************
@@ -23,6 +31,8 @@ void CANhandleInsertRequest(node* n);
 void CANhandleAddNeighbor(node* n);
 void CANhandleRmvNeighbor(node* n);
 void CANhandleInfoRequest(node* n);
+int findInsertDirection(point* p, node* trg);
+int chooseDirectionRandomly(int direction);
 void updateNeighbors(int dir, node* n);
 void recalculateNeighborsForDirection(int dir, node* n);
 int isNodeNeighbor(int dir, node* src, node* trg);
@@ -64,12 +74,13 @@ void CANinsertInit()
   int buf, i;
   MPI_Status status;
 
+  buf = idProcess;
   /* Le coordinateur demande au bootstrap de s'insérer */
   MPI_Send(&buf, 1, MPI_INT, BOOTSTRAP_NODE, U_CAN_INSERT, MPI_COMM_WORLD);
   
   /* Attente de bonne insertion du bootstrap */
   MPI_Recv(&buf, 1, MPI_INT, BOOTSTRAP_NODE, DONE_INSERT,
-	   MPI_COMM_WORLD, &status);
+     MPI_COMM_WORLD, &status);
 
   for(i=0; i<nbProcess; i++){
     if( i != BOOTSTRAP_NODE && i != INIT_NODE ){
@@ -78,36 +89,47 @@ void CANinsertInit()
       
       /* Attente de bonne insertion du noeud */
       MPI_Recv(&buf, 1, MPI_INT, i, MPI_ANY_TAG,
-	       MPI_COMM_WORLD, &status);
-
+         MPI_COMM_WORLD, &status);
       if( status.MPI_TAG == FAILED_INSERT ){
-	fprintf(stderr, "ERROR: Failed insert\n");
-	continue;
+        fprintf(stderr, "ERROR: Failed insert\n");
+        continue;
       }
+    }
+  }
+}
+
+void CANend()
+{
+  int buf, i;
+
+  for(i=0; i<nbProcess; i++){
+    if( i != INIT_NODE){
+      /* On lui demande de s'inserer */
+      MPI_Send(&buf, 1, MPI_INT, i, END, MPI_COMM_WORLD);      
     }
   }
 }
 
 void CANinsertBootstrap()
 {
-  int buf;
+  int buf = idProcess;
   MPI_Status status;
 
   /* attente de l'autorisation à s'insérer */
   MPI_Recv(&buf, 1, MPI_INT, MPI_ANY_SOURCE, U_CAN_INSERT, 
-	   MPI_COMM_WORLD, &status);
+     MPI_COMM_WORLD, &status);
   
   /* le BOOTSTRAP_NODE sera toujours le premier à s'insérer donc
      il prendra par défaut toute la surface */
   myNode = newNode(idProcess,
-		   newRandomPoint(),
-		   newSpaceWithCoord(COORD_MIN_X,
-				     COORD_MIN_Y,
-				     COORD_MAX_X,
-				     COORD_MAX_Y));
+       newRandomPoint(),
+       newSpaceWithCoord(COORD_MIN_X,
+             COORD_MIN_Y,
+             COORD_MAX_X,
+             COORD_MAX_Y));
   
   MPI_Send(&buf, 1, MPI_INT, INIT_NODE, DONE_INSERT,
-	   MPI_COMM_WORLD);
+     MPI_COMM_WORLD);
   
   return;
 }
@@ -118,19 +140,18 @@ void CANinsertNode()
   int buf;
   MPI_Status status;
   MPI_Recv(&buf, 1, MPI_INT, INIT_NODE, U_CAN_INSERT,
-	   MPI_COMM_WORLD, &status);
-
+     MPI_COMM_WORLD, &status);
   /* allocation du noeud avec génération aléatoire des coordonnées */
   myNode = newNodeWithRandomPoint(idProcess);
 
   /* requete d'insertion -> bootstrap */
   MPI_Send(&myNode, sizeof(node), MPI_BYTE, BOOTSTRAP_NODE,
-	   REQUEST_INSERT, MPI_COMM_WORLD);
+     REQUEST_INSERT, MPI_COMM_WORLD);
 
   /* attente de réponse */
   MPI_Recv(&myNode, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
-	   REQUEST_INSERT, MPI_COMM_WORLD, &status);
-  
+     REQUEST_INSERT, MPI_COMM_WORLD, &status);
+
   /* notification du boss */
   if(myNode.id == -1){
     MPI_Send(&buf, 1, MPI_INT, INIT_NODE, FAILED_INSERT, MPI_COMM_WORLD);
@@ -170,7 +191,7 @@ void CANhandleInsertRequest(node* n)
       trg = chooseDirectionRandomly(trg);
 
     MPI_Send(n, sizeof(node), MPI_BYTE, myNode.neighbors[trg].idList[0], 
-	     REQUEST_INSERT, MPI_COMM_WORLD);
+       REQUEST_INSERT, MPI_COMM_WORLD);
   }
   
   return;
@@ -178,35 +199,48 @@ void CANhandleInsertRequest(node* n)
 /*******************************************************************************
  * Message handling ( may be better in an other thread )
  ******************************************************************************/
-void CANhandleMessage()
+int CANhandleMessage()
 {
-  node buf;
+  
   MPI_Status status;
 
   printf("%d waiting for message\n", myNode.id);
 
   /* waiting for message */
-  MPI_Recv(&buf, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
-	   MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+  MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+  
+  printf("%d handled %d message\n", myNode.id, status.MPI_SOURCE);
 
-  printf("%d handled %d from %d message type %d\n", myNode.id, buf.id, status.MPI_SOURCE, status.MPI_TAG);
+  /* SI on doit traiter une data */
+  if(status.MPI_TAG == REQUEST_INSERT_DATA){
+    data buf;
+    MPI_Recv(&buf, sizeof(data), MPI_BYTE, MPI_ANY_SOURCE,
+     REQUEST_INSERT_DATA, MPI_COMM_WORLD, &status);
 
-  switch(status.MPI_TAG)
-    {
-    case REQUEST_INSERT: CANhandleInsertRequest(&buf); break;
-    case ADD_NEIGHBOR: CANhandleAddNeighbor(&buf); break;
-    case RMV_NEIGHBOR: CANhandleRmvNeighbor(&buf); break;
-    case INFO_REQUEST: CANhandleInfoRequest(&buf); break;
-    default: break;
-    }
+    CANhandleInsertDataRequest(&buf);
+  }else{
+    node buf;
+    MPI_Recv(&buf, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
+     MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-  return;
+    switch(status.MPI_TAG)
+      {
+      case REQUEST_INSERT: CANhandleInsertRequest(&buf); break;
+      case ADD_NEIGHBOR: CANhandleAddNeighbor(&buf); break;
+      case RMV_NEIGHBOR: CANhandleRmvNeighbor(&buf); break;
+      case INFO_REQUEST: CANhandleInfoRequest(&buf); break;
+      case WANT_INFO: handleDisplayRequest(); break;
+      case END: return -1;
+      default: break;
+      }
+  }
+  return 1;
 }
 
 void CANhandleAddNeighbor(node* n)
 {
   pushNodeToListNode(&(n->neighbors[findInsertDirection(&(n->coord), &myNode)]),
-		     n->id);
+         n->id);
 
   int buf;
   MPI_Send(&buf, 1, MPI_INT, n->id, ADD_NEIGHBOR_ACK, MPI_COMM_WORLD);
@@ -215,7 +249,7 @@ void CANhandleAddNeighbor(node* n)
 void CANhandleRmvNeighbor(node* n)
 {
   popNodeFromListNodeById(&(n->neighbors[findInsertDirection(&(n->coord), &myNode)])
-			  , n->id);
+        , n->id);
 
   int buf;
   MPI_Send(&buf, 1, MPI_INT, n->id, RMV_NEIGHBOR_ACK, MPI_COMM_WORLD);
@@ -224,7 +258,7 @@ void CANhandleRmvNeighbor(node* n)
 void CANhandleInfoRequest(node* n)
 {
   MPI_Send(&myNode, sizeof(node), MPI_BYTE, n->id, INFO_REQUEST_ACK,
-	   MPI_COMM_WORLD);
+     MPI_COMM_WORLD);
 }
 /*******************************************************************************
  * Other Operations 
@@ -304,23 +338,23 @@ void recalculateNeighborsForDirection(int dir, node* n)
   MPI_Status status;
   for(i=0; i<myNode.neighbors[dir].size; i++){
     MPI_Send(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[dir].idList[i],
-	     INFO_REQUEST, MPI_COMM_WORLD);
+       INFO_REQUEST, MPI_COMM_WORLD);
     MPI_Recv(&buf, sizeof(node), MPI_BYTE, myNode.neighbors[dir].idList[i],
-	     INFO_REQUEST_ACK, MPI_COMM_WORLD, &status);
+       INFO_REQUEST_ACK, MPI_COMM_WORLD, &status);
     if( !isNodeNeighbor(dir, &myNode, &buf) ){
       popNodeFromListNodeById(&(n->neighbors[dir]), buf.id);
       i--;
       MPI_Send(&myNode, sizeof(node), MPI_BYTE, buf.id, RMV_NEIGHBOR,
-	       MPI_COMM_WORLD);
+         MPI_COMM_WORLD);
       MPI_Recv(&tmp, 1, MPI_INT, buf.id, RMV_NEIGHBOR_ACK,
-	       MPI_COMM_WORLD, &status);
+         MPI_COMM_WORLD, &status);
     }
     if( isNodeNeighbor(dir, n, &buf) ){
       pushNodeToListNode(&(n->neighbors[dir]), buf.id);
       MPI_Send(n, sizeof(node), MPI_BYTE, buf.id, ADD_NEIGHBOR,
-	       MPI_COMM_WORLD);
+         MPI_COMM_WORLD);
       MPI_Recv(&tmp, 1, MPI_INT, buf.id, ADD_NEIGHBOR_ACK,
-	       MPI_COMM_WORLD, &status);
+         MPI_COMM_WORLD, &status);
     }
   }
   return;
