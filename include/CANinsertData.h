@@ -4,7 +4,6 @@
 #include <CAN.h>
 #include <data.h>
 
-#define NB_DATA 	10
 #define NB_STOCKAGE 5
 
 /*******************************************************************************
@@ -18,7 +17,7 @@ void CANhandleInsertDataRequest(data* d);
 /*
  * Traitement d'une reception d'insertion de donnée
  */
-void CANinsertDataInit();
+void CANinsertDataInit(int nbData);
 
 data* getLastInsert();
 data* getFirstInsert();

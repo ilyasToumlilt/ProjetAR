@@ -39,8 +39,8 @@ $(LIB)/libCAN.a: $(OBJ)/point.o $(OBJ)/space.o $(OBJ)/node.o $(OBJ)/data.o $(OBJ
 can: $(LIB)/libCAN.a
 
 main: can $(BIN)/CANmain
-	mpirun -np 5 $(BIN)/CANmain
-
+	mpirun -np 10 $(BIN)/CANmain
+	
 clean:
 	rm -f ${OBJ}/* ${BIN}/* ${LIB}/*
 

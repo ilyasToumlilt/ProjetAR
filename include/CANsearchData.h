@@ -9,7 +9,7 @@
  * et les NB_STOCKAGE dernieres
  */
 void CANsearchDataInit();
-
+void searchData(data d);
 /**
  * Traitement d'une reception de demande de recherche
  */

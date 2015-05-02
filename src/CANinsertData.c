@@ -17,14 +17,14 @@ data* getLastInsert(){ return lastInsert;}
 data* getFirstInsert(){ return firstInsert;}
 
 /* 
- * Tente d'inserer NB_DATA données dans le CAN
+ * Tente d'inserer nbData données dans le CAN
  */
-void CANinsertDataInit()
+void CANinsertDataInit(int nbData)
 {
   int buf, i;
   MPI_Status status;
 
-  for(i=0; i<NB_DATA; i++){
+  for(i=0; i<nbData; i++){
     /* Création de la data */
     data d = newData(newRandomPoint());
 
@@ -79,9 +79,9 @@ void gestionStockage(int indexData, data d)
       firstInsert[indexData] = d;
     }
     /* Decallage lastInsert */
-    for (j = 0; j < NB_STOCKAGE-1; ++j)
+    for (j = NB_STOCKAGE-1; j > 0 ; --j)
     {
-      lastInsert[j+1] = lastInsert[j];
+      lastInsert[j] = lastInsert[j-1];
     }
     lastInsert[0] = d;
   return;

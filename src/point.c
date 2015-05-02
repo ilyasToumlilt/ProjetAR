@@ -37,8 +37,7 @@ point newPoint(int x, int y)
  * @return le point alloué
  */
 point newRandomPoint()
-{
-  /* @todo ne pas oublier le srand() */
+{  
   return newPoint((rand()%COORD_MAX_X)+COORD_MIN_X, 
 		  (rand()%COORD_MAX_Y)+COORD_MIN_Y);
 }

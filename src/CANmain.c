@@ -3,6 +3,7 @@
 #include <CANsearchData.h>
 #include <display.h>
 
+
 int main(int argc, char** argv)
 {
   int ret = 0;
@@ -19,26 +20,33 @@ int main(int argc, char** argv)
   MPI_Comm_rank(MPI_COMM_WORLD, &myId);
   MPI_Comm_size(MPI_COMM_WORLD, &nbProcess);
 
+  srand((unsigned)time(NULL)+getpid()*myId+nbProcess);
+
   if(myId == INIT_NODE){
+    printf("*******************\n");
+    printf("%d nodes à ajouter\n", nbProcess);
+    printf("%d datas à ajouter\n", nbProcess*10);
+    printf("*******************\n");
+
     /* Action du noeud init */
-    CANinsertDataInit();
-    printf("---------Insertion: OK----------\n");
+    printf("---------Debut Insertion----------\n");
+    CANinsertDataInit(nbProcess*10); 
+    printf("--------- Fin Insertion ----------\n");
 
-    printf("---------Search:  ----------\n");
-    CANsearchDataInit();
-    printf("---------Search: OK----------\n");
+    printf("---------Debut Search----------\n");
+     CANsearchDataInit(); 
+    printf("--------- Fin Search ----------\n");
 
-    printf("---------Affichage:   ----------\n");
+    printf("---------Debut Affichage----------\n");
     displayInit(nbProcess, "P2P_Viewer/trace/test-1.txt");
-    printf("---------Affichage: OK----------\n");
+    printf("--------- Fin Affichage ----------\n");
 
-    printf("---------Remove:   ----------\n");
+    printf("---------Debut Remove----------\n");
+    /* Tire une node aleatoirement puis le retire */
+    /* Lance une recherche sur une des anciennes data du noeud
+     Pour voir si elle a changé de pere */
 
-    printf("---------Remove: OK----------\n");
-
-    printf("---------Affichage:   ----------\n");
-    displayInit(nbProcess, "P2P_Viewer/trace/test-2.txt");
-    printf("---------Affichage: OK----------\n");
+    printf("--------- Fin Remove ----------\n");
 
     CANend();
 
@@ -49,6 +57,5 @@ int main(int argc, char** argv)
     }  
   }
   MPI_Finalize();
-
   return 1;
 }

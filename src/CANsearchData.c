@@ -30,11 +30,11 @@ void CANsearchDataInit()
       /* Dernieres datas inserées */
       d = getLastInsert()[(i/2)];
     } 
-
+    /* Données en stock */
     searchData(d);
 
   }
-
+  /* Données random */
   searchRandom(4);
 }
 

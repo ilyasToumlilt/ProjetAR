@@ -3,29 +3,29 @@
 
 ** Participants : 2 **
 
-   MABILLOT Paul  -         - <paul.mabillot@etu.upmc.fr>
+   MABILLOT Paul  - 3100385 - <paul.mabillot@etu.upmc.fr>
    TOUMLILT Ilyas - 3261538 - <ilyas.toumlilt@etu.upmc.fr>
 
 ** a propos **
-   Pour cette version de soumission on a une librairie complète avec les 4 étapes demandée
+   Pour cette version de soumission on a une librairie complète avec les 4 étapes demandées
    qui compile mais qui ne marche pas pour tous les cas, nous essayerons de débuguer l'execution
-   et d'avoir une code totalement fonctionnel pour la soutenance du Lundi
+   et d'avoir une code totalement fonctionnel pour la soutenance du Lundi. Cependant le code
+   soumis est clair, documenté et décrit le fonctionnement global des algos choisis.
    
 ** Fichiers inclus **
 
    Primitives:
-   -> include/point.h :
-   -> src/point.c :
-   -> include/space.h :
-   -> src/space.c :
-   -> include/node.h :
-   -> src/node.c :
-   -> include/list_node.h :
-   -> src/list_node.c :
-
-   API publique :
-   -> include/CAN.h :
-   -> src/CAN.c :
+   -> src/CAN.c include/CAN.h : bibliohtèque globale
+   -> src/CANsearchData.c(.h) : coté recherche de data de l'API
+   -> src/CANinsertData.c(.h) : coté insertion de data de l'aPI
+   
+   Bibliothèque d'affichage:
+   -> include/display.h
+   -> src/display.c
+   
+   Le reste sont des primitives
+   -> include/*.h : headers
+   -> src/*.c : implementations
 
 **== Directives de 'makefile' ==**
 
@@ -39,34 +39,11 @@
 
 **== Etat d'avancement ==**
 
-   Primitives - OK
-   Insertion  - KO
-   
-
-**== Réponses ==**
-
+   Algos           - OK
+   API d'affichage - OK
+   Tests           - KO
+   Main            - KO
    
 
 **Soumission**
     le 30 avril
-
-**todo**
-OK marche en mono
-KO revoir l'attribution des voisins p
-KO insert MPI i
-OK .c .h primitives des données p
-
-KO inserer ses données i
-KO recherche MPI i
-KO suppression i
-KO test case p
-KO sortie pour affichage p
-OK affichage p
-
-**test case**
-une première ligne avec :
-<nbNodes> <nbData>
-nbNodes lignes avec :
-id x y
-nbDatas lignes avec
-data x y

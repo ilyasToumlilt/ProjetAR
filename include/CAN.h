@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 #include <mpi.h>
 
 typedef struct _point     point;
@@ -77,8 +78,6 @@ typedef struct _list_node list_node;
 /* exit tag */
 #define END 900
 
-
-
 /*******************************************************************************
  * Operations
  ******************************************************************************/
@@ -117,6 +116,7 @@ int CANhandleMessage();
  * Le noeud à supprimer et bien sur le noeud courant.
  */
 void CANremove();
+
 
 /**
  * à l'insertion j'ai besoin de savoir où se trouve un point par

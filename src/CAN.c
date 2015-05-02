@@ -12,6 +12,8 @@
 /* each CAN process has : */
 node myNode; /* it's node */
 
+/* Initialisation du random */
+
 /**
  * getter pour que le binome puisse travailler séparemment sur un autre fichier 
  *
@@ -308,7 +310,7 @@ void CANhandleInsertRequest(node* n)
 
     /* si je ne suis pas dans mon sous-espace je retire une nouvelle 
        valeur dedans ... */
-    if( !isPointInNodesSpace(&(n->coord), n) ){
+    while( !isPointInNodesSpace(&(n->coord), n) ){
       n->coord.x = (rand()%n->area.north_east.x) + n->area.south_west.x;
       n->coord.y = (rand()%n->area.north_east.y) + n->area.south_west.y;
     }
@@ -359,6 +361,9 @@ void CANremove()
 	       REQUEST_REMOVE, MPI_COMM_WORLD);
       MPI_Recv(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[i].idList[0],
 	       REQUEST_REMOVE, MPI_COMM_WORLD, &status);
+
+      MPI_Send(&myNode, sizeof(node), MPI_BYTE, BOOTSTRAP_NODE,
+         DONE_REMOVE, MPI_COMM_WORLD);
       return;
     }
   }
@@ -377,6 +382,8 @@ void CANremove()
 	       REQUEST_REMOVE, MPI_COMM_WORLD, &status);
     }
   }
+  MPI_Send(&myNode, sizeof(node), MPI_BYTE, BOOTSTRAP_NODE,
+         DONE_REMOVE, MPI_COMM_WORLD);
   return;
 }
 
@@ -737,5 +744,23 @@ void recalculateNeighborsAfterRemove(int dir, node* n)
     }
     MPI_Send(n, sizeof(node), MPI_BYTE, buf.id, RMV_NEIGHBOR,
 	     MPI_COMM_WORLD);
+  }
+}
+
+/**
+ * Traitement d'une requete de fermeture de l'ensemble des noeuds
+ *
+ * On ferme les noeuds
+ *
+ */
+void CANend()
+{
+  int buf, i;
+
+  for(i=0; i<nbProcess; i++){
+    if( i != INIT_NODE){
+      /* On lui demande de s'inserer */
+      MPI_Send(&buf, 1, MPI_INT, i, END, MPI_COMM_WORLD);      
+    }
   }
 }
