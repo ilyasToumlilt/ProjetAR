@@ -739,3 +739,21 @@ void recalculateNeighborsAfterRemove(int dir, node* n)
 	     MPI_COMM_WORLD);
   }
 }
+
+/**
+ * Traitement d'une requete de fermeture de l'ensemble des noeuds
+ *
+ * On ferme les noeuds
+ *
+ */
+void CANend()
+{
+  int buf, i;
+
+  for(i=0; i<nbProcess; i++){
+    if( i != INIT_NODE){
+      /* On lui demande de s'inserer */
+      MPI_Send(&buf, 1, MPI_INT, i, END, MPI_COMM_WORLD);      
+    }
+  }
+}
