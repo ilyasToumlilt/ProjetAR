@@ -107,6 +107,15 @@ int popNodeFromListNodeById(list_node* ln, int id)
   return ret;
 }
 
+void addNodeToListNode(list_node* ln, int id)
+{
+  int i;
+  for(i=0; i<ln->size; i++)
+    if(ln->idList[i] == id)
+      return;
+  pushNodeToListNode(ln, id);
+}
+
 /*******************************************************************************
  * Views
  ******************************************************************************/

@@ -14,7 +14,7 @@ node getNode()
 }
 
 /*******************************************************************************
- * Private Declaration
+ * Private Declarations
  ******************************************************************************/
 void CANinsertInit();
 void CANinsertBootstrap();
@@ -23,9 +23,14 @@ void CANhandleInsertRequest(node* n);
 void CANhandleAddNeighbor(node* n);
 void CANhandleRmvNeighbor(node* n);
 void CANhandleInfoRequest(node* n);
+void CANhandleRemoveRequest(node* n);
+int  findNodesDirection(node* n);
 void updateNeighbors(int dir, node* n);
 void recalculateNeighborsForDirection(int dir, node* n);
-int isNodeNeighbor(int dir, node* src, node* trg);
+int  isNodeNeighbor(int dir, node* src, node* trg);
+void propagateInNodesSpace(int dir, node* n);
+void updateNeighborsAfterRemove(int dir, node* n);
+void recalculateNeighborsAfterRemove(int dir, node* n);
 
 /*******************************************************************************
  * Initialization
@@ -162,9 +167,7 @@ void CANhandleInsertRequest(node* n)
     }
 
     /* update des voisins */
-    printf("HELLO\n");
     updateNeighbors(findInsertDirection(&(n->coord), &myNode), n);
-    printf("OLLEH\n");
 
     /* insertion done */
     MPI_Send(n, sizeof(node), MPI_BYTE, n->id, REQUEST_INSERT, MPI_COMM_WORLD);
@@ -181,6 +184,43 @@ void CANhandleInsertRequest(node* n)
   
   return;
 }
+
+/*******************************************************************************
+ * Step 4 : Remove
+ ******************************************************************************/
+void CANremove()
+{
+  /* si j'ai un voisinnage avec un seul voisin je lui attribue directement mon
+     espace, c'est le plus simple */
+  int i;
+  MPI_Status status;
+  for(i=0; i<NB_DIRECTIONS; i++){
+    if(myNode.neighbors[i].size == 1){
+      MPI_Send(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[i].idList[0],
+	       REQUEST_REMOVE, MPI_COMM_WORLD);
+      MPI_Recv(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[i].idList[0],
+	       REQUEST_REMOVE, MPI_COMM_WORLD, &status);
+      return;
+    }
+  }
+
+  /* sinon je prends le coté avec le moins de voisins 
+     ( le moins de messages ) */
+  int min = 0;
+  for(i=0; i<NB_DIRECTIONS; i++){
+    min = ( myNode.neighbors[i].size > i ) ? myNode.neighbors[i].size : i;
+  }
+  if( min ){
+    for(i=0; i<myNode.neighbors[min].size; i++){
+      MPI_Send(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[min].idList[i],
+	       REQUEST_REMOVE, MPI_COMM_WORLD);
+      MPI_Recv(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[min].idList[i],
+	       REQUEST_REMOVE, MPI_COMM_WORLD, &status);
+    }
+  }
+  return;
+}
+
 /*******************************************************************************
  * Message handling ( may be better in an other thread )
  ******************************************************************************/
@@ -200,9 +240,10 @@ void CANhandleMessage()
   switch(status.MPI_TAG)
     {
     case REQUEST_INSERT: CANhandleInsertRequest(&buf); break;
-    case ADD_NEIGHBOR: CANhandleAddNeighbor(&buf); break;
-    case RMV_NEIGHBOR: CANhandleRmvNeighbor(&buf); break;
-    case INFO_REQUEST: CANhandleInfoRequest(&buf); break;
+    case ADD_NEIGHBOR  : CANhandleAddNeighbor(&buf)  ; break;
+    case RMV_NEIGHBOR  : CANhandleRmvNeighbor(&buf)  ; break;
+    case INFO_REQUEST  : CANhandleInfoRequest(&buf)  ; break;
+    case REQUEST_REMOVE: CANhandleRemoveRequest(&buf); break;
     default: break;
     }
 
@@ -235,6 +276,23 @@ void CANhandleInfoRequest(node* n)
 {
   MPI_Send(&myNode, sizeof(node), MPI_BYTE, n->id, INFO_REQUEST_ACK,
 	   MPI_COMM_WORLD);
+}
+
+void CANhandleRemoveRequest(node* n)
+{
+  /* d'abord je cherche la direction */
+  int dir = findNodesDirection(n);
+
+  /* je me propage dans cette direction */
+  propagateInNodesSpace(dir, n);
+
+  /* MAJ des voisins */
+  updateNeighborsAfterRemove(dir, n);
+
+  /* notification de suppression */
+  MPI_Send(&myNode, sizeof(node), MPI_BYTE, n->id, REQUEST_REMOVE,
+	   MPI_COMM_WORLD);
+  
 }
 /*******************************************************************************
  * Other Operations 
@@ -281,6 +339,19 @@ int chooseDirectionRandomly(int direction)
   default:
     return (rand()%2) ? SOUTH : EAST;
   }
+}
+
+int findNodesDirection(node* n)
+{
+  if(isNodeNeighbor(NORTH, &myNode, n))
+    return NORTH;
+  if(isNodeNeighbor(SOUTH, &myNode, n))
+    return SOUTH;
+  if(isNodeNeighbor(EAST, &myNode, n))
+    return EAST;
+  if(isNodeNeighbor(WEST, &myNode, n))
+    return WEST;
+  return -1;
 }
 
 /* dir : insert direction
@@ -353,4 +424,54 @@ int isNodeNeighbor(int dir, node* src, node* trg)
       return 1;
   }
   return 0;
+}
+
+void propagateInNodesSpace(int dir, node* n)
+{
+  if( dir == NORTH ){
+    myNode.area.north_east.y = n->area.north_east.y;
+  }
+  else if( dir == SOUTH ){
+    myNode.area.south_west.y = n->area.south_west.y;
+  }
+  else if( dir == WEST ){
+    myNode.area.south_west.x = n->area.south_west.x;
+  }
+  else if( dir == EAST ){
+    myNode.area.north_east.x = n->area.north_east.x;
+  }
+  return;
+}
+
+void updateNeighborsAfterRemove(int dir, node* n)
+{
+  /* pour la direction dir je refais ma liste */
+  myNode.neighbors[dir].size = 0;
+  recalculateNeighborsAfterRemove(dir, n);
+
+  /* pour l'opposée je ne fais rien*/
+
+  /* et pour les deux autres je rajoute les news à ma liste */
+  recalculateNeighborsAfterRemove((dir+1)%NB_DIRECTIONS, n);
+  recalculateNeighborsAfterRemove((dir+3)%NB_DIRECTIONS, n);
+}
+
+void recalculateNeighborsAfterRemove(int dir, node* n)
+{
+  int i;
+  node buf;
+  MPI_Status status;
+  for(i=0; i<n->neighbors[dir].size; i++){
+    MPI_Send(&myNode, sizeof(node), MPI_BYTE, n->neighbors[dir].idList[i],
+	     INFO_REQUEST, MPI_COMM_WORLD);
+    MPI_Recv(&buf, sizeof(node), MPI_BYTE, n->neighbors[dir].idList[i],
+	     INFO_REQUEST_ACK, MPI_COMM_WORLD, &status);
+    if( isNodeNeighbor(dir, &myNode, &buf) ){
+      addNodeToListNode(&(myNode.neighbors[dir]), buf.id);
+      MPI_Send(&myNode, sizeof(node), MPI_BYTE, buf.id, ADD_NEIGHBOR,
+	       MPI_COMM_WORLD);
+    }
+    MPI_Send(n, sizeof(node), MPI_BYTE, buf.id, RMV_NEIGHBOR,
+	     MPI_COMM_WORLD);
+  }
 }

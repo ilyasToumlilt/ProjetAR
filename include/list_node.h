@@ -52,6 +52,8 @@ list_node newListNode();
  */
 void pushNodeToListNode(list_node* ln, int id);
 
+void addNodeToListNode(list_node* ln, int id);
+
 /**
  * Dépile un élement ( le premier ) de la liste
  *

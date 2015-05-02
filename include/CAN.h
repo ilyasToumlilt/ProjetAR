@@ -43,14 +43,17 @@ typedef struct _list_node list_node;
 #define DONE_INSERT      11
 #define FAILED_INSERT    12
 #define REQUEST_INSERT   13
-
+/* remove tags */
+#define U_CAN_REMOVE     30
+#define DONE_REMOVE      31
+#define REQUEST_REMOVE   32
+/* neighbor tags */
 #define ADD_NEIGHBOR     20
 #define RMV_NEIGHBOR     22
 /* @todo pas besoin d'ACK ...
 #define ADD_NEIGHBOR_ACK 21
 #define RMV_NEIGHBOR_ACK 23
 */
-
 #define INFO_REQUEST     90
 #define INFO_REQUEST_ACK 91
 
@@ -62,6 +65,8 @@ typedef struct _list_node list_node;
 void CANinitialize();
 void CANinsert();
 void CANhandleMessage();
+
+void CANremove();
 
 
 int findInsertDirection(point* p, node* trg);
