@@ -154,3 +154,20 @@ space splitNodesSpace(node* src)
     }
   }
 }
+
+/*******************************************************************************
+ * View
+ ******************************************************************************/
+void printNode(node n)
+{
+  printf("Node {\n");
+  printf("-> id = %d;\n", n.id);
+  printf("-> coord = (%d,%d);\n", n.coord.x, n.coord.y);
+  printf("-> area = (%d,%d)(%d,%d);\n", n.area.south_west.x,
+	 n.area.south_west.y, n.area.north_east.x, n.area.north_east.y);
+  printf("-> NORTH:"); printListNode(n.neighbors[NORTH]);
+  printf("-> EAST :"); printListNode(n.neighbors[EAST]);
+  printf("-> SOUTH:"); printListNode(n.neighbors[SOUTH]);
+  printf("-> WEST :"); printListNode(n.neighbors[WEST]);
+  printf("}\n");
+}

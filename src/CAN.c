@@ -80,6 +80,8 @@ void CANinsertInit()
       MPI_Recv(&buf, 1, MPI_INT, i, MPI_ANY_TAG,
 	       MPI_COMM_WORLD, &status);
 
+      printf("INIT: inserted node %d\n", status.MPI_SOURCE);
+
       if( status.MPI_TAG == FAILED_INSERT ){
 	fprintf(stderr, "ERROR: Failed insert\n");
 	continue;
@@ -137,6 +139,8 @@ void CANinsertNode()
     return;
   }
   MPI_Send(&buf, 1, MPI_INT, INIT_NODE, DONE_INSERT, MPI_COMM_WORLD);
+
+  printNode(myNode);
 }
 
 void CANhandleInsertRequest(node* n)
@@ -158,7 +162,9 @@ void CANhandleInsertRequest(node* n)
     }
 
     /* update des voisins */
+    printf("HELLO\n");
     updateNeighbors(findInsertDirection(&(n->coord), &myNode), n);
+    printf("OLLEH\n");
 
     /* insertion done */
     MPI_Send(n, sizeof(node), MPI_BYTE, n->id, REQUEST_INSERT, MPI_COMM_WORLD);
@@ -207,9 +213,11 @@ void CANhandleAddNeighbor(node* n)
 {
   pushNodeToListNode(&(n->neighbors[findInsertDirection(&(n->coord), &myNode)]),
 		     n->id);
-
-  int buf;
-  MPI_Send(&buf, 1, MPI_INT, n->id, ADD_NEIGHBOR_ACK, MPI_COMM_WORLD);
+  
+  /* @todo pas besoin d'ACK ...
+  int buf = 0;
+  MPI_Ssend(&buf, 1, MPI_INT, n->id, ADD_NEIGHBOR_ACK, MPI_COMM_WORLD);
+  */
 }
 
 void CANhandleRmvNeighbor(node* n)
@@ -217,8 +225,10 @@ void CANhandleRmvNeighbor(node* n)
   popNodeFromListNodeById(&(n->neighbors[findInsertDirection(&(n->coord), &myNode)])
 			  , n->id);
 
-  int buf;
+  /* @todo pas besoin d'ACK ...
+  int buf = 0;
   MPI_Send(&buf, 1, MPI_INT, n->id, RMV_NEIGHBOR_ACK, MPI_COMM_WORLD);
+  */
 }
 
 void CANhandleInfoRequest(node* n)
@@ -293,13 +303,12 @@ void updateNeighbors(int dir, node* n)
      rapport aux limites */
   recalculateNeighborsForDirection((dir+1)%NB_DIRECTIONS, n);
   recalculateNeighborsForDirection((dir+3)%NB_DIRECTIONS, n);
-  
   return;
 }
 
 void recalculateNeighborsForDirection(int dir, node* n)
 {
-  int i, tmp;
+  int i;
   node buf;
   MPI_Status status;
   for(i=0; i<myNode.neighbors[dir].size; i++){
@@ -312,15 +321,19 @@ void recalculateNeighborsForDirection(int dir, node* n)
       i--;
       MPI_Send(&myNode, sizeof(node), MPI_BYTE, buf.id, RMV_NEIGHBOR,
 	       MPI_COMM_WORLD);
+      /* @todo pas besoin d'ACK ...
       MPI_Recv(&tmp, 1, MPI_INT, buf.id, RMV_NEIGHBOR_ACK,
 	       MPI_COMM_WORLD, &status);
+      */
     }
     if( isNodeNeighbor(dir, n, &buf) ){
       pushNodeToListNode(&(n->neighbors[dir]), buf.id);
       MPI_Send(n, sizeof(node), MPI_BYTE, buf.id, ADD_NEIGHBOR,
 	       MPI_COMM_WORLD);
+      /* @todo pas besoin d'ACK ...
       MPI_Recv(&tmp, 1, MPI_INT, buf.id, ADD_NEIGHBOR_ACK,
 	       MPI_COMM_WORLD, &status);
+      */
     }
   }
   return;

@@ -45,9 +45,11 @@ typedef struct _list_node list_node;
 #define REQUEST_INSERT   13
 
 #define ADD_NEIGHBOR     20
-#define ADD_NEIGHBOR_ACK 21
 #define RMV_NEIGHBOR     22
+/* @todo pas besoin d'ACK ...
+#define ADD_NEIGHBOR_ACK 21
 #define RMV_NEIGHBOR_ACK 23
+*/
 
 #define INFO_REQUEST     90
 #define INFO_REQUEST_ACK 91

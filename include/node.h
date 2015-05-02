@@ -48,5 +48,9 @@ int isNodeInNodesSpace(node* src, node* trg);                 /* not used */
 int isPointInNodesSpace(point* p, node* n);
 space getNodesSubSpace(node* src);
 space splitNodesSpace(node* src);
+/*******************************************************************************
+ * View
+ ******************************************************************************/
+void printNode(node n);
 
 #endif

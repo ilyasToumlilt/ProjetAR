@@ -2,10 +2,6 @@
  * Projet AR - Content-Adressable Network
  * Implémentation des primitives de gestion des listes de noeuds
  *
- * Une liste de noeuds <list_node> est une liste chaînée dont chaque élement
- * pointe versun noeud <node> n, et sur son successeur dans la liste.
- * La liste vide est un pointeur sur NULL
- *
  * @author Ilyas Toumlilt <toumlilt.ilyas@gmail.com>
  * @author Paul  Mabillot <paul.mabilot@etu.upmc.fr>
  *
@@ -111,38 +107,17 @@ int popNodeFromListNodeById(list_node* ln, int id)
   return ret;
 }
 
-/**
- * Produit une copie de la liste de noeuds passée en params
- *
- * @param ln liste de noeuds à copier
- * @return copie de la liste
- */
-/*
-list_node* cloneListNode(list_node* ln)
-{
-  if( !ln )
-    return NULL;
-  return newListNode(ln->id, cloneListNode(ln->next));
-}
-*/
 /*******************************************************************************
  * Views
  ******************************************************************************/
-/**
- * Imprime le contenu de la liste ( identifiants des noeuds ) sur STDOUT
- *
- * @param ln la liste de noeuds à imprimer
- */
-/*
-void printListNode(list_node* ln)
+void printListNode(list_node ln)
 {
-  if( !ln ){
-    printf("->[]\n");
-  } else {
-    printf("->[%d]", ln->id);
-    printListNode(ln->next);
-  }
+  int i;
+  printf("[");
+  for(i=0; i<ln.size; i++)
+    printf("%d,", ln.idList[i]);
+  printf("]\n");
   
   return;
 }
-*/
+
