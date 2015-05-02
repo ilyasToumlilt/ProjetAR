@@ -1,12 +1,17 @@
 #ProjetAR - Content-Adressable Network
 ######version 1.0
 
-**== Participants : 2 ==**
+** Participants : 2 **
 
    MABILLOT Paul  -         - <paul.mabillot@etu.upmc.fr>
-   TOUMLILT Ilyas - 3261538 - <toumlilt.ilyas@gmail.com>
+   TOUMLILT Ilyas - 3261538 - <ilyas.toumlilt@etu.upmc.fr>
+
+** a propos **
+   Pour cette version de soumission on a une librairie complète avec les 4 étapes demandée
+   qui compile mais qui ne marche pas pour tous les cas, nous essayerons de débuguer l'execution
+   et d'avoir une code totalement fonctionnel pour la soutenance du Lundi
    
-**== Fichiers inclus ==**
+** Fichiers inclus **
 
    Primitives:
    -> include/point.h :

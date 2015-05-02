@@ -390,30 +390,48 @@ void CANremove()
  * et selon le type de TAG la fonction de traitement correspondante sera
  * appelée
  */
-void CANhandleMessage()
+int CANhandleMessage()
 {
   node buf;
+  data data;
   MPI_Status status;
 
-  printf("%d waiting for message\n", myNode.id);
-
   /* waiting for message */
-  MPI_Recv(&buf, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
-	   MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+  MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+  
+  /* Si il s'agit d'un traitement sur une donnée */
+  if(status.MPI_TAG == REQUEST_INSERT_DATA || status.MPI_TAG == REQUEST_SEARCH_DATA){
 
-  printf("%d handled %d from %d message type %d\n", myNode.id, buf.id, status.MPI_SOURCE, status.MPI_TAG);
+    MPI_Recv(&data, sizeof(data), MPI_BYTE, MPI_ANY_SOURCE,
+    MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-  switch(status.MPI_TAG)
-    {
-    case REQUEST_INSERT: CANhandleInsertRequest(&buf); break;
-    case ADD_NEIGHBOR  : CANhandleAddNeighbor(&buf)  ; break;
-    case RMV_NEIGHBOR  : CANhandleRmvNeighbor(&buf)  ; break;
-    case INFO_REQUEST  : CANhandleInfoRequest(&buf)  ; break;
-    case REQUEST_REMOVE: CANhandleRemoveRequest(&buf); break;
-    default: break;
-    }
+    switch(status.MPI_TAG)
+      {
+      case REQUEST_INSERT_DATA: CANhandleInsertDataRequest(&data); break;
+      case REQUEST_SEARCH_DATA: CANhandleSearchDataRequest(&data); break;
+      default: break;
+      }
+    
+  }
+  else{ 
+      MPI_Recv(&buf, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
+     MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-  return;
+    printf("%d handled %d from %d message type %d\n", myNode.id, buf.id, status.MPI_SOURCE, status.MPI_TAG);
+
+    switch(status.MPI_TAG)
+      {
+      case REQUEST_INSERT: CANhandleInsertRequest(&buf); break;
+      case ADD_NEIGHBOR: CANhandleAddNeighbor(&buf); break;
+      case RMV_NEIGHBOR: CANhandleRmvNeighbor(&buf); break;
+      case INFO_REQUEST: CANhandleInfoRequest(&buf); break;
+      case REQUEST_REMOVE: CANhandleRemoveRequest(&buf); break;
+      case WANT_INFO: handleDisplayRequest(); break;
+      case END: return -1; break;
+      default: break;
+      }
+  }
+  return 1;
 }
 
 /**

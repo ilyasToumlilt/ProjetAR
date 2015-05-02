@@ -102,7 +102,7 @@ void CANinsert();
  * et selon le type de TAG la fonction de traitement correspondante sera
  * appelée
  */
-void CANhandleMessage();
+int CANhandleMessage();
 
 /**
  * Opérations de suppression d'un noeud.
