@@ -23,8 +23,6 @@ void CANhandleInsertRequest(node* n);
 void CANhandleAddNeighbor(node* n);
 void CANhandleRmvNeighbor(node* n);
 void CANhandleInfoRequest(node* n);
-int findInsertDirection(point* p, node* trg);
-int chooseDirectionRandomly(int direction);
 void updateNeighbors(int dir, node* n);
 void recalculateNeighborsForDirection(int dir, node* n);
 int isNodeNeighbor(int dir, node* src, node* trg);
@@ -191,7 +189,7 @@ void CANhandleMessage()
   MPI_Recv(&buf, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
 	   MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-  printf("%d handled %d message\n", myNode.id, buf.id);
+  printf("%d handled %d from %d message type %d\n", myNode.id, buf.id, status.MPI_SOURCE, status.MPI_TAG);
 
   switch(status.MPI_TAG)
     {
@@ -319,7 +317,7 @@ void recalculateNeighborsForDirection(int dir, node* n)
     }
     if( isNodeNeighbor(dir, n, &buf) ){
       pushNodeToListNode(&(n->neighbors[dir]), buf.id);
-      MPI_Send(&n, sizeof(node), MPI_BYTE, buf.id, ADD_NEIGHBOR,
+      MPI_Send(n, sizeof(node), MPI_BYTE, buf.id, ADD_NEIGHBOR,
 	       MPI_COMM_WORLD);
       MPI_Recv(&tmp, 1, MPI_INT, buf.id, ADD_NEIGHBOR_ACK,
 	       MPI_COMM_WORLD, &status);

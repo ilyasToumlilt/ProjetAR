@@ -61,6 +61,10 @@ void CANinitialize();
 void CANinsert();
 void CANhandleMessage();
 
+
+int findInsertDirection(point* p, node* trg);
+int chooseDirectionRandomly(int direction);
+
 node getNode();
 
 #endif
