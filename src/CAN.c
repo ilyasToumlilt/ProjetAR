@@ -1,8 +1,8 @@
 #include <CAN.h>
+
 #include <CANinsertData.h>
 #include <CANsearchData.h>
 #include <display.h>
-
 
 #include <point.h>
 #include <space.h>
@@ -12,29 +12,136 @@
 /* each CAN process has : */
 node myNode; /* it's node */
 
+/**
+ * getter pour que le binome puisse travailler séparemment sur un autre fichier 
+ *
+ * @return node le node du process courant
+ */
 node getNode()
 {
   return myNode;
 }
-void setNode(node n){ myNode = n;}
+void setNode(node n){ 
+  myNode = n;
+}
 
 /*******************************************************************************
- * Private Declaration
+ * Private Declarations
  ******************************************************************************/
+/**
+ * Opérations d'insertion concernant l'initiateur
+ * insère d'abord le BOOTSTRAP_NODE
+ * puis tous les autres
+ */
 void CANinsertInit();
+/**
+ * Fonction d'insertion du BOOTSTRAP_NODE
+ * Comme ça sera toujours le premier à s'insérer
+ * il prendra par défaut tout l'espace
+ */
 void CANinsertBootstrap();
+/**
+ * Fonction d'insertion pour tous les autres noeuds 
+ * Le noeud attend d'abord l'autorisation de l'initiateur
+ * puis envoi une demande d'insertion au bootstrap
+ * cette demande sera relayée jusqu'à ce qu'on trouve le noeud 
+ * contenant ses coordonnées ( générée aléatoirement )
+ */
 void CANinsertNode();
+/**
+ * Fonction qui s'occupe de traiter le message d'insertion
+ * Si le noeud à insérer ne setrouve pas dans mon espace,
+ * je cherche une direction où je pourrais l'envoyer
+ * puis je transmet la requete à mon premier voisin de cette direction
+ * sinon je divise mon espace et je réaffecte mes ( et ses ) voisins 
+ *
+ * @param n le noeud à insérer 
+ */
 void CANhandleInsertRequest(node* n);
+/**
+ * Traitement d'une requete d'ajout de voisin
+ *
+ * @param n le noeud à rajouter
+ */
 void CANhandleAddNeighbor(node* n);
+/**
+ * Traitement d'une requete de suppression de voisin
+ *
+ * @param n le noeud à supprimer
+ */
 void CANhandleRmvNeighbor(node* n);
+/**
+ * Traitement d'une requete de demande d'informations
+ *
+ * @param n le noeud demandeur
+ */
 void CANhandleInfoRequest(node* n);
+/**
+ * Traitement d'une requete de suppression de noeud
+ *
+ * Le noeud est surement mon voisin, je propage sur son espace
+ * et je récupère ses voisins.
+ *
+ * @param n le noeud à supprimer
+ */
 void CANhandleRemoveRequest(node* n);
-int findNodesDirection(node* n);
+
+/**
+ * Le noeud passé en param est-il mon voisin ? 
+ * Si oui dans quelle direction ?
+ *
+ * @param n le noeud à repérer
+ * @return la direction ou -1 si ce n'est pas mon voisin
+ */
+int  findNodesDirection(node* n);
+
+/**
+ * Au cours de l'insertion j'ai besoin de remettre à jour les voisins 
+ * 
+ * @param dir la direction d'insertion
+ * @param n le noeud à insérer
+ */
 void updateNeighbors(int dir, node* n);
+
+/**
+ * Au cours de l'insertion, pour les directions adjacentes 
+ * on a besoin de recalculer toute la liste des voisins ...
+ *
+ * @param dir direction de recalcul 
+ * @param n le noeud à insérer
+ */
 void recalculateNeighborsForDirection(int dir, node* n);
+
+/**
+ * is trg src's neighbor in dir direction ? 
+*/
 int  isNodeNeighbor(int dir, node* src, node* trg);
+
+/**
+ * au cours de la suppression j'ai besoin de me propager sur 
+ * l'espace du noeud à supprimer
+ *
+ * @param dir direction de propagation 
+ * @param n le noeud à supprimer
+ */
 void propagateInNodesSpace(int dir, node* n);
+
+/**
+ * Opérations de mise à jour des voisins 
+ * à la suppression
+ *
+ * @param dir direction de suppression
+ * @param n le noeud à supprimer
+ */
 void updateNeighborsAfterRemove(int dir, node* n);
+
+/**
+ * Recalcule les voisins à la suppression
+ * pour une direction précise
+ *
+ * @param dir direction de recalcul
+ * @param n le noeud à supprimer
+ */
 void recalculateNeighborsAfterRemove(int dir, node* n);
 
 /*******************************************************************************
@@ -42,6 +149,11 @@ void recalculateNeighborsAfterRemove(int dir, node* n);
  ******************************************************************************/
 int nbProcess;
 int idProcess;
+/**
+ * Opérations d'Initialization
+ * Ne fait pas grand chose à part récupérer l'id et 
+ * le nombre de process 
+ */
 void CANinitialize()
 {
   /* getting total number of process */
@@ -54,6 +166,10 @@ void CANinitialize()
 /*******************************************************************************
  * Step 1 : Insertion
  ******************************************************************************/
+/**
+ * Opération d'insertion, appelle la bonne fonction selon le type de
+ * process ( INIT / BOOTSTRAP / OTHERS )
+ */
 void CANinsert()
 {
   if( idProcess == INIT_NODE ){
@@ -69,6 +185,11 @@ void CANinsert()
   return;
 }
 
+/**
+ * Opérations d'insertion concernant l'initiateur
+ * insère d'abord le BOOTSTRAP_NODE
+ * puis tous les autres
+ */
 void CANinsertInit()
 {
   int buf, i;
@@ -100,6 +221,11 @@ void CANinsertInit()
   }
 }
 
+/**
+ * Fonction d'insertion du BOOTSTRAP_NODE
+ * Comme ça sera toujours le premier à s'insérer
+ * il prendra par défaut tout l'espace
+ */
 void CANinsertBootstrap()
 {
   int buf;
@@ -124,6 +250,13 @@ void CANinsertBootstrap()
   return;
 }
 
+/**
+ * Fonction d'insertion pour tous les autres noeuds 
+ * Le noeud attend d'abord l'autorisation de l'initiateur
+ * puis envoi une demande d'insertion au bootstrap
+ * cette demande sera relayée jusqu'à ce qu'on trouve le noeud 
+ * contenant ses coordonnées ( générée aléatoirement )
+ */
 void CANinsertNode()
 {
   /* attente d'autorisation du boss */
@@ -153,6 +286,15 @@ void CANinsertNode()
   printNode(myNode);
 }
 
+/**
+ * Fonction qui s'occupe de traiter le message d'insertion
+ * Si le noeud à insérer ne setrouve pas dans mon espace,
+ * je cherche une direction où je pourrais l'envoyer
+ * puis je transmet la requete à mon premier voisin de cette direction
+ * sinon je divise mon espace et je réaffecte mes ( et ses ) voisins 
+ *
+ * @param n le noeud à insérer 
+ */
 void CANhandleInsertRequest(node* n)
 {
   /* @todo si mon espace ne fait qu'un seul pixel, l'insertion est impossible */
@@ -190,10 +332,21 @@ void CANhandleInsertRequest(node* n)
   return;
 }
 
-
 /*******************************************************************************
  * Step 4 : Remove
  ******************************************************************************/
+/**
+ * Opérations de suppression d'un noeud.
+ *
+ * Pour économiser le nombre de messages, j'essaye d'abord d'attribuer mon
+ * espace au voisinnage avec une unique voisin
+ * Sinon au voisinnage avec le nombre min de voisins.
+ * Je ne traite pas le cas où je n'ai pas de voisins car on considère ici
+ * qu'on ne supprime pas le BOOTSTRAP_NODE
+ * ( ou pas encore ).
+ *
+ * Le noeud à supprimer et bien sur le noeud courant.
+ */
 void CANremove()
 {
   /* si j'ai un voisinnage avec un seul voisin je lui attribue directement mon
@@ -203,9 +356,9 @@ void CANremove()
   for(i=0; i<NB_DIRECTIONS; i++){
     if(myNode.neighbors[i].size == 1){
       MPI_Send(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[i].idList[0],
-         REQUEST_REMOVE, MPI_COMM_WORLD);
+	       REQUEST_REMOVE, MPI_COMM_WORLD);
       MPI_Recv(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[i].idList[0],
-         REQUEST_REMOVE, MPI_COMM_WORLD, &status);
+	       REQUEST_REMOVE, MPI_COMM_WORLD, &status);
       return;
     }
   }
@@ -219,9 +372,9 @@ void CANremove()
   if( min ){
     for(i=0; i<myNode.neighbors[min].size; i++){
       MPI_Send(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[min].idList[i],
-         REQUEST_REMOVE, MPI_COMM_WORLD);
+	       REQUEST_REMOVE, MPI_COMM_WORLD);
       MPI_Recv(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[min].idList[i],
-         REQUEST_REMOVE, MPI_COMM_WORLD, &status);
+	       REQUEST_REMOVE, MPI_COMM_WORLD, &status);
     }
   }
   return;
@@ -230,50 +383,44 @@ void CANremove()
 /*******************************************************************************
  * Message handling ( may be better in an other thread )
  ******************************************************************************/
-int CANhandleMessage()
+/**
+ * Fonction de traitement des messages reçus
+ *
+ * Les messages sont classés par TAGs ( consulter CAN.h )
+ * et selon le type de TAG la fonction de traitement correspondante sera
+ * appelée
+ */
+void CANhandleMessage()
 {
   node buf;
-  data data;
   MPI_Status status;
 
+  printf("%d waiting for message\n", myNode.id);
+
   /* waiting for message */
-  MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-  
-  /* Si il s'agit d'un traitement sur une donnée */
-  if(status.MPI_TAG == REQUEST_INSERT_DATA || status.MPI_TAG == REQUEST_SEARCH_DATA){
+  MPI_Recv(&buf, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
+	   MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-    MPI_Recv(&data, sizeof(data), MPI_BYTE, MPI_ANY_SOURCE,
-    MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+  printf("%d handled %d from %d message type %d\n", myNode.id, buf.id, status.MPI_SOURCE, status.MPI_TAG);
 
-    switch(status.MPI_TAG)
-      {
-      case REQUEST_INSERT_DATA: CANhandleInsertDataRequest(&data); break;
-      case REQUEST_SEARCH_DATA: CANhandleSearchDataRequest(&data); break;
-      default: break;
-      }
-    
-  }
-  else{ 
-      MPI_Recv(&buf, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
-     MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+  switch(status.MPI_TAG)
+    {
+    case REQUEST_INSERT: CANhandleInsertRequest(&buf); break;
+    case ADD_NEIGHBOR  : CANhandleAddNeighbor(&buf)  ; break;
+    case RMV_NEIGHBOR  : CANhandleRmvNeighbor(&buf)  ; break;
+    case INFO_REQUEST  : CANhandleInfoRequest(&buf)  ; break;
+    case REQUEST_REMOVE: CANhandleRemoveRequest(&buf); break;
+    default: break;
+    }
 
-    printf("%d handled %d from %d message type %d\n", myNode.id, buf.id, status.MPI_SOURCE, status.MPI_TAG);
-
-    switch(status.MPI_TAG)
-      {
-      case REQUEST_INSERT: CANhandleInsertRequest(&buf); break;
-      case ADD_NEIGHBOR: CANhandleAddNeighbor(&buf); break;
-      case RMV_NEIGHBOR: CANhandleRmvNeighbor(&buf); break;
-      case INFO_REQUEST: CANhandleInfoRequest(&buf); break;
-      case REQUEST_REMOVE: CANhandleRemoveRequest(&buf); break;
-      case WANT_INFO: handleDisplayRequest(); break;
-      case END: return -1; break;
-      default: break;
-      }
-  }
-  return 1;
+  return;
 }
 
+/**
+ * Traitement d'une requete d'ajout de voisin
+ *
+ * @param n le noeud à rajouter
+ */
 void CANhandleAddNeighbor(node* n)
 {
   pushNodeToListNode(&(n->neighbors[findInsertDirection(&(n->coord), &myNode)]),
@@ -285,6 +432,11 @@ void CANhandleAddNeighbor(node* n)
   */
 }
 
+/**
+ * Traitement d'une requete de suppression de voisin
+ *
+ * @param n le noeud voisin à supprimer
+ */
 void CANhandleRmvNeighbor(node* n)
 {
   popNodeFromListNodeById(&(n->neighbors[findInsertDirection(&(n->coord), &myNode)])
@@ -296,12 +448,25 @@ void CANhandleRmvNeighbor(node* n)
   */
 }
 
+/**
+ * Traitement d'une requete de demande d'informations
+ *
+ * @param n le noeud demandeur
+ */
 void CANhandleInfoRequest(node* n)
 {
   MPI_Send(&myNode, sizeof(node), MPI_BYTE, n->id, INFO_REQUEST_ACK,
 	   MPI_COMM_WORLD);
 }
 
+/**
+ * Traitement d'une requete de suppression de noeud
+ *
+ * Le noeud est surement mon voisin, je propage sur son espace
+ * et je récupère ses voisins.
+ *
+ * @param n le noeud à supprimer
+ */
 void CANhandleRemoveRequest(node* n)
 {
   /* d'abord je cherche la direction */
@@ -315,25 +480,20 @@ void CANhandleRemoveRequest(node* n)
 
   /* notification de suppression */
   MPI_Send(&myNode, sizeof(node), MPI_BYTE, n->id, REQUEST_REMOVE,
-     MPI_COMM_WORLD);
+	   MPI_COMM_WORLD);
   
 }
-
-void CANend()
-{
-  int buf, i;
-
-  for(i=0; i<nbProcess; i++){
-    if( i != INIT_NODE){
-      /* On lui demande de s'inserer */
-      MPI_Send(&buf, 1, MPI_INT, i, END, MPI_COMM_WORLD);      
-    }
-  }
-}
-
 /*******************************************************************************
  * Other Operations 
  ******************************************************************************/
+/**
+ * à l'insertion j'ai besoin de savoir où se trouve un point par
+ * rapport à mon espace, pour rediriger l'insertion ...
+ *
+ * @param p le point recherché
+ * @param trg la cible
+ * @return la direction où se trouve p par rapport à trg
+ */
 int findInsertDirection(point* p, node* trg)
 {
   if( p->x >= trg->area.north_east.x &&
@@ -364,19 +524,15 @@ int findInsertDirection(point* p, node* trg)
   return SOUTHWEST;
 }
 
-int findNodesDirection(node* n)
-{
-  if(isNodeNeighbor(NORTH, &myNode, n))
-    return NORTH;
-  if(isNodeNeighbor(SOUTH, &myNode, n))
-    return SOUTH;
-  if(isNodeNeighbor(EAST, &myNode, n))
-    return EAST;
-  if(isNodeNeighbor(WEST, &myNode, n))
-    return WEST;
-  return -1;
-}
-
+/**
+ * au cours de la redirection des fois une point se trouve dans une 
+ * direction "diagonale" par rapport à mon espace, dans ce cas là j'ai
+ * besoin de choisir aléatoirement entre les deux
+ * par exemple NORTHWEST c'est alétoirement ou NORTH ou WEST
+ *
+ * @param direction la direction composée
+ * @return la direction choisie
+ */
 int chooseDirectionRandomly(int direction)
 {
   switch(direction){
@@ -391,9 +547,32 @@ int chooseDirectionRandomly(int direction)
   }
 }
 
-/* dir : insert direction
-   n : new inserted node 
-*/ 
+/**
+ * Le noeud passé en param est-il mon voisin ? 
+ * Si oui dans quelle direction ?
+ *
+ * @param n le noeud à repérer
+ * @return la direction ou -1 si ce n'est pas mon voisin
+ */
+int findNodesDirection(node* n)
+{
+  if(isNodeNeighbor(NORTH, &myNode, n))
+    return NORTH;
+  if(isNodeNeighbor(SOUTH, &myNode, n))
+    return SOUTH;
+  if(isNodeNeighbor(EAST, &myNode, n))
+    return EAST;
+  if(isNodeNeighbor(WEST, &myNode, n))
+    return WEST;
+  return -1;
+}
+
+/**
+ * Au cours de l'insertion j'ai besoin de remettre à jour les voisins 
+ * 
+ * @param dir la direction d'insertion
+ * @param n le noeud à insérer
+ */
 void updateNeighbors(int dir, node* n)
 {
   int i;
@@ -414,6 +593,13 @@ void updateNeighbors(int dir, node* n)
   return;
 }
 
+/**
+ * Au cours de l'insertion, pour les directions adjacentes 
+ * on a besoin de recalculer toute la liste des voisins ...
+ *
+ * @param dir direction de recalcul 
+ * @param n le noeud à insérer
+ */
 void recalculateNeighborsForDirection(int dir, node* n)
 {
   int i;
@@ -447,7 +633,9 @@ void recalculateNeighborsForDirection(int dir, node* n)
   return;
 }
 
-/* is trg src's neighbor in dir direction ? */
+/**
+ * is trg src's neighbor in dir direction ? 
+*/
 int isNodeNeighbor(int dir, node* src, node* trg)
 {
   if( dir == NORTH || dir == SOUTH ){
@@ -463,6 +651,13 @@ int isNodeNeighbor(int dir, node* src, node* trg)
   return 0;
 }
 
+/**
+ * au cours de la suppression j'ai besoin de me propager sur 
+ * l'espace du noeud à supprimer
+ *
+ * @param dir direction de propagation 
+ * @param n le noeud à supprimer
+ */
 void propagateInNodesSpace(int dir, node* n)
 {
   if( dir == NORTH ){
@@ -480,6 +675,13 @@ void propagateInNodesSpace(int dir, node* n)
   return;
 }
 
+/**
+ * Opérations de mise à jour des voisins 
+ * à la suppression
+ *
+ * @param dir direction de suppression
+ * @param n le noeud à supprimer
+ */
 void updateNeighborsAfterRemove(int dir, node* n)
 {
   /* pour la direction dir je refais ma liste */
@@ -493,6 +695,13 @@ void updateNeighborsAfterRemove(int dir, node* n)
   recalculateNeighborsAfterRemove((dir+3)%NB_DIRECTIONS, n);
 }
 
+/**
+ * Recalcule les voisins à la suppression
+ * pour une direction précise
+ *
+ * @param dir direction de recalcul
+ * @param n le noeud à supprimer
+ */
 void recalculateNeighborsAfterRemove(int dir, node* n)
 {
   int i;
@@ -500,15 +709,15 @@ void recalculateNeighborsAfterRemove(int dir, node* n)
   MPI_Status status;
   for(i=0; i<n->neighbors[dir].size; i++){
     MPI_Send(&myNode, sizeof(node), MPI_BYTE, n->neighbors[dir].idList[i],
-       INFO_REQUEST, MPI_COMM_WORLD);
+	     INFO_REQUEST, MPI_COMM_WORLD);
     MPI_Recv(&buf, sizeof(node), MPI_BYTE, n->neighbors[dir].idList[i],
-       INFO_REQUEST_ACK, MPI_COMM_WORLD, &status);
+	     INFO_REQUEST_ACK, MPI_COMM_WORLD, &status);
     if( isNodeNeighbor(dir, &myNode, &buf) ){
       addNodeToListNode(&(myNode.neighbors[dir]), buf.id);
       MPI_Send(&myNode, sizeof(node), MPI_BYTE, buf.id, ADD_NEIGHBOR,
-         MPI_COMM_WORLD);
+	       MPI_COMM_WORLD);
     }
     MPI_Send(n, sizeof(node), MPI_BYTE, buf.id, RMV_NEIGHBOR,
-       MPI_COMM_WORLD);
-}
+	     MPI_COMM_WORLD);
+  }
 }
