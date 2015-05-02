@@ -17,6 +17,7 @@
 /*******************************************************************************
  * Constructors
  ******************************************************************************/
+
 /**
  * Constructeur d'un element list_data
  *
@@ -24,11 +25,11 @@
  * @param next la donnée suivant
  * @return liste_data* l'element alloué.
  */
-list_data* newListData(data* d, list_data* next)
+list_data newListData(data d)
 {
-  list_data* ret = (list_data*)malloc(sizeof(list_data));
-  ret->d = d;
-  ret->next = next;
+  list_data ret;
+  ret.d = d;
+  ret.next = NULL;
   return ret;
 }
 
@@ -44,7 +45,7 @@ list_data* newListData(data* d, list_data* next)
 void freeListData(list_data* ld)
 {
   if( ld ){
-    freeListNode(ld->next);
+    freeListData(ld->next);
     free(ld);
   }
 
@@ -54,48 +55,16 @@ void freeListData(list_data* ld)
 /*******************************************************************************
  * Operations
  ******************************************************************************/
-/*
+ 
 /**
  * Empile ( au début ) un élement dans la liste
  *
  * @param ld adresse de la liste 
  * @param d la donnée à empiler
  */
-void pushDataToListData(list_data** ld, data* d)
+list_data pushDataToListData(data d, list_data listData)
 {
-  *(ld) = newListNode(d, *(ld));
-  return;
-}
-
-/**
- * Produit une copie de la liste de données passée en params
- *
- * @param ld liste de datas à copier
- * @return copie de la liste
- */
-list_data* cloneListData(list_data* ld)
-{
-  if( !ld )
-    return NULL;
-  return newListData(ld->d, cloneListData(ld->next));
-}
-
-/*******************************************************************************
- * Views
- ******************************************************************************/
-/**
- * Imprime le contenu de la liste ( valeur des données ) sur STDOUT
- *
- * @param ld la liste de data à imprimer
- */
-void printListData(list_data* ld)
-{
-  if( !ld ){
-    printf("->[]\n");
-  } else {
-    printf("->[%d]", ld->d->val);
-    printListNode(ld->next);
-  }
-  
-  return;
+  list_data ret = newListData(d);
+  ret.next = &listData;
+  return ret;
 }

@@ -1,4 +1,4 @@
-﻿*/**
+﻿/**
  * Projet AR - Content-Adressable Network
  * Primitives de gestion des données - Header
  *
@@ -15,12 +15,12 @@
 /*******************************************************************************
  * Contructor
  ******************************************************************************/
-data* newData(point* coord)
+data newData(point coord)
 {
-  data* ret = (data*)malloc(sizeof(data));
+  data ret;
 
-  ret->val = coord->x+coord->y;
-  ret->coord = coord;
+  ret.val = coord.x+coord.y;
+  ret.coord = coord;
   
   return ret;
 }
@@ -31,7 +31,7 @@ data* newData(point* coord)
  ******************************************************************************/
 void freeData(data* d)
 {
-  freePoint(d->coord);
+  freePoint(&(d->coord));
   free(d);
 
   return;
@@ -42,25 +42,17 @@ void freeData(data* d)
  ******************************************************************************/
 int isDataInCoord(data* d, int x1, int y1, int x2, int y2)
 {
-  return (d->coord->x >= x1 &&
-	  d->coord->x <  x2 &&
-	  d->coord->y >= y1 &&
-	  d->coord->y <  y2) ? 1 : 0;
+  return (d->coord.x >= x1 &&
+	  d->coord.x <  x2 &&
+	  d->coord.y >= y1 &&
+	  d->coord.y <  y2) ? 1 : 0;
 }
 
 int isDataInSpace(data* d, space* sp)
 {
   return isDataInCoord(d,
-		       sp->down_left->x,
-		       sp->down_left->y,
-		       sp->up_right->x,
-		       sp->up_right->y);
-}
-
-/*
- * Is src in trg's space ?
- */
-int isDataInNodesSpace(data* d, node* trg)
-{
-  return isNodeInSpace(d, trg->area);
+           sp->south_west.x,
+           sp->south_west.y,
+           sp->north_east.x,
+           sp->north_east.y);
 }

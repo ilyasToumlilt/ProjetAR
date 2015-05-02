@@ -33,7 +33,7 @@ $(BIN)/% : $(OBJ)/%.o
 	$(CC) -o $@ $< ${LPTHREAD} -L$(LIB) -lCAN
 #fin regles generales
 
-$(LIB)/libCAN.a: $(OBJ)/point.o $(OBJ)/space.o $(OBJ)/node.o $(OBJ)/list_node.o $(OBJ)/CAN.o
+$(LIB)/libCAN.a: $(OBJ)/point.o $(OBJ)/space.o $(OBJ)/node.o $(OBJ)/data.o $(OBJ)/list_node.o $(OBJ)/list_data.o $(OBJ)/CAN.o $(OBJ)/CANinsertData.o
 	ar -rcs $@ $^
 
 can: $(LIB)/libCAN.a

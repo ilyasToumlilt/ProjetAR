@@ -1,4 +1,4 @@
-﻿*/**
+﻿/**
  * Projet AR - Content-Adressable Network
  * Primitives de gestion des données - Header
  *
@@ -14,16 +14,19 @@
 #define __DATA_H__
 
 #include <CAN.h>
-
+#include <point.h>
+#include <space.h>
+ 
+typedef struct _data data;
 struct _data {
   int val;
-  point* coord;
+  point coord;
 };
 
 /*******************************************************************************
  * Contructor
  ******************************************************************************/
-data* newData(point* coord);
+data newData(point coord);
 
 /*******************************************************************************
  * Destructor
@@ -34,6 +37,5 @@ void freeData(data* d);
  ******************************************************************************/
 int isDataInCoord(data* d, int x1, int y1, int x2, int y2);
 int isDataInSpace(data* d, space* sp);
-int isDataInNodesSpace(data* d, node* trg);
 
 #endif
