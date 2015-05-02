@@ -24,6 +24,7 @@ typedef struct _list_node list_node;
 #define SOUTHEAST 7
 
 #define N 10
+#define MAX_DATA 100
 
 /* coord limits */
 #define COORD_MIN_X 0
@@ -43,19 +44,34 @@ typedef struct _list_node list_node;
 #define DONE_INSERT      11
 #define FAILED_INSERT    12
 #define REQUEST_INSERT   13
+
+/* Neighbor tag */
+#define ADD_NEIGHBOR     20
+#define RMV_NEIGHBOR     22
+
 /* remove tags */
 #define U_CAN_REMOVE     30
 #define DONE_REMOVE      31
 #define REQUEST_REMOVE   32
-/* neighbor tags */
-#define ADD_NEIGHBOR     20
-#define RMV_NEIGHBOR     22
-/* @todo pas besoin d'ACK ...
-#define ADD_NEIGHBOR_ACK 21
-#define RMV_NEIGHBOR_ACK 23
-*/
+
 #define INFO_REQUEST     90
 #define INFO_REQUEST_ACK 91
+
+/* Insert tag */
+#define DONE_INSERT_DATA     100
+#define REQUEST_INSERT_DATA  101
+
+/* Search tag */
+#define DONE_SEARCH_DATA    200
+#define FAILED_SEARCH_DATA 	201
+#define REQUEST_SEARCH_DATA 202
+
+/* Display tag */
+#define WANT_INFO 301
+#define GIVE_INFO 302
+
+/* exit tag */
+#define END 900
 
 
 
@@ -64,14 +80,14 @@ typedef struct _list_node list_node;
  ******************************************************************************/
 void CANinitialize();
 void CANinsert();
-void CANhandleMessage();
-
+int CANhandleMessage();
 void CANremove();
-
+void CANend();
 
 int findInsertDirection(point* p, node* trg);
 int chooseDirectionRandomly(int direction);
 
 node getNode();
+void setNode(node n);
 
 #endif

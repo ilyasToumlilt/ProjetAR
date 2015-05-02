@@ -26,6 +26,7 @@ node newNode(int id, point coord, space area)
   int i;
   for(i=0; i<NB_DIRECTIONS; i++)
     ret.neighbors[i]=newListNode();
+  ret.nbData = 0;
   return ret;
 }
 
@@ -170,4 +171,15 @@ void printNode(node n)
   printf("-> SOUTH:"); printListNode(n.neighbors[SOUTH]);
   printf("-> WEST :"); printListNode(n.neighbors[WEST]);
   printf("}\n");
+}
+
+int containData(node n, data d){
+  int i;
+  for (i = 0; i < n.nbData; ++i)
+  {
+    if(d.coord.x == n.ld[i].coord.x && d.coord.y == n.ld[i].coord.y){
+      return i;
+    }
+  }
+  return -1;
 }
