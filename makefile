@@ -30,7 +30,7 @@ $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) -c -o $@ $< -I$(INC)
 
 $(BIN)/% : $(OBJ)/%.o
-	$(CC) -o $@ $< ${LPTHREAD} -L$(LIB) -lCAN
+	$(CC) -o $@ $< -L$(LIB) -lCAN
 #fin regles generales
 
 $(LIB)/libCAN.a: $(OBJ)/point.o $(OBJ)/space.o $(OBJ)/node.o $(OBJ)/data.o $(OBJ)/list_node.o $(OBJ)/CAN.o $(OBJ)/CANinsertData.o $(OBJ)/CANsearchData.o $(OBJ)/display.o 
@@ -39,8 +39,8 @@ $(LIB)/libCAN.a: $(OBJ)/point.o $(OBJ)/space.o $(OBJ)/node.o $(OBJ)/data.o $(OBJ
 can: $(LIB)/libCAN.a
 
 main: can $(BIN)/CANmain
-	mpirun -np 10 $(BIN)/CANmain
-	
+	mpirun -np 200 $(BIN)/CANmain
+
 clean:
 	rm -f ${OBJ}/* ${BIN}/* ${LIB}/*
 

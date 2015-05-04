@@ -270,6 +270,8 @@ void CANinsertNode()
   /* allocation du noeud avec génération aléatoire des coordonnées */
   myNode = newNodeWithRandomPoint(idProcess);
 
+  printf("Before insert %d :\n", idProcess);
+
   /* requete d'insertion -> bootstrap */
   MPI_Send(&myNode, sizeof(node), MPI_BYTE, BOOTSTRAP_NODE,
 	   REQUEST_INSERT, MPI_COMM_WORLD);
@@ -277,7 +279,7 @@ void CANinsertNode()
   /* attente de réponse */
   MPI_Recv(&myNode, sizeof(node), MPI_BYTE, MPI_ANY_SOURCE,
 	   REQUEST_INSERT, MPI_COMM_WORLD, &status);
-  
+
   /* notification du boss */
   if(myNode.id == -1){
     MPI_Send(&buf, 1, MPI_INT, INIT_NODE, FAILED_INSERT, MPI_COMM_WORLD);
@@ -448,9 +450,10 @@ int CANhandleMessage()
  */
 void CANhandleAddNeighbor(node* n)
 {
-  pushNodeToListNode(&(n->neighbors[findInsertDirection(&(n->coord), &myNode)]),
+  int insDir = findNodesDirection(n);
+  addNodeToListNode(&(n->neighbors[insDir]),
 		     n->id);
-  
+
   /* @todo pas besoin d'ACK ...
   int buf = 0;
   MPI_Ssend(&buf, 1, MPI_INT, n->id, ADD_NEIGHBOR_ACK, MPI_COMM_WORLD);
@@ -464,7 +467,7 @@ void CANhandleAddNeighbor(node* n)
  */
 void CANhandleRmvNeighbor(node* n)
 {
-  popNodeFromListNodeById(&(n->neighbors[findInsertDirection(&(n->coord), &myNode)])
+  popNodeFromListNodeById(&(n->neighbors[findNodesDirection(n)])
 			  , n->id);
 
   /* @todo pas besoin d'ACK ...

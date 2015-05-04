@@ -14,7 +14,7 @@
 
 typedef struct _list_node list_node;
 struct _list_node {
-  int idList[N-1]; /* @todo largement améliorable */
+  int idList[512]; /* @todo largement améliorable */
   int size;
 };
 

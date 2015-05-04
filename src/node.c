@@ -33,7 +33,7 @@ node newNode(int id, point coord, space area)
 node newNodeWithRandomPoint(int id)
 {
   return newNode(id, newRandomPoint(), 
-		 newSpace(newRandomPoint(),newRandomPoint()));
+		 newSpace(newPoint(0,0),newPoint(0,0)));
 }
 
 /*******************************************************************************
@@ -171,6 +171,7 @@ void printNode(node n)
   printf("-> SOUTH:"); printListNode(n.neighbors[SOUTH]);
   printf("-> WEST :"); printListNode(n.neighbors[WEST]);
   printf("}\n");
+  fflush(NULL);
 }
 
 int containData(node n, data d){
