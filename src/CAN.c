@@ -146,6 +146,9 @@ void updateNeighborsAfterRemove(int dir, node* n);
  */
 void recalculateNeighborsAfterRemove(int dir, node* n);
 
+int isNodePerfectNeighbor(int dir, node* src, node* trg);
+int ifNeighborsCanTakeMyArea(int dir);
+
 /*******************************************************************************
  * Initialization
  ******************************************************************************/
@@ -349,6 +352,7 @@ void CANremoveNode(int id)
 
   MPI_Recv(&buf, 1, MPI_INT, id, DONE_REMOVE,
 	   MPI_COMM_WORLD, &status);
+  printf("YOYOYO\n");
 }
 
 /**
@@ -370,13 +374,18 @@ void CANremove()
   int i;
   MPI_Status status;
   for(i=0; i<NB_DIRECTIONS; i++){
-    if(myNode.neighbors[i].size == 1){
+    if(myNode.neighbors[i].size == 1 && ifNeighborsCanTakeMyArea(i) ){
+
+      printf("Node %d: node %d can take my area\n", idProcess, myNode.neighbors[i].idList[0]);
+
       MPI_Send(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[i].idList[0],
 	       REQUEST_REMOVE, MPI_COMM_WORLD);
       MPI_Recv(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[i].idList[0],
 	       REQUEST_REMOVE, MPI_COMM_WORLD, &status);
 
-      MPI_Send(&myNode, sizeof(node), MPI_BYTE, BOOTSTRAP_NODE,
+      printf("YOYO\n");
+
+      MPI_Send(&myNode, sizeof(node), MPI_BYTE, INIT_NODE,
          DONE_REMOVE, MPI_COMM_WORLD);
       return;
     }
@@ -386,7 +395,8 @@ void CANremove()
      ( le moins de messages ) */
   int min = 0;
   for(i=0; i<NB_DIRECTIONS; i++){
-    min = ( myNode.neighbors[i].size > i ) ? myNode.neighbors[i].size : i;
+    if( ifNeighborsCanTakeMyArea(i) )
+      min = ( myNode.neighbors[i].size > i ) ? myNode.neighbors[i].size : i;
   }
   if( min ){
     for(i=0; i<myNode.neighbors[min].size; i++){
@@ -515,7 +525,7 @@ void CANhandleRemoveRequest(node* n)
   /* d'abord je cherche la direction */
   int dir = findNodesDirection(n);
 
-  printf("node %d will remove %d\n");
+  printf("node %d will remove %d\n", idProcess, n->id);
 
   /* je me propage dans cette direction */
   propagateInNodesSpace(dir, n);
@@ -785,14 +795,39 @@ void CANend()
   }
 }
 
+int isNodePerfectNeighbor(int dir, node* src, node* trg)
+{
+  if( dir == NORTH || dir == SOUTH ){
+    if(trg->area.south_west.x < src->area.north_east.x &&
+       trg->area.north_east.x > src->area.south_west.x )
+      return 1;
+  }
+  else {
+    if(trg->area.south_west.y < src->area.north_east.y &&
+       trg->area.north_east.y > src->area.south_west.y)
+      return 1;
+  }
+  return 0;
+}
+
 int ifNeighborsCanTakeMyArea(int dir)
 {
   node buf;
   int i;
-  int ret=0;
-  
-  for(i=0; i<myNode.neighbor[dir])
+  MPI_Status status;
 
+  if( myNode.neighbors[dir].size == 0 )
+    return 0;
 
-    return ret;
+  for(i=0; i<myNode.neighbors[dir].size; i++){
+    MPI_Send(&myNode, sizeof(node), MPI_BYTE, myNode.neighbors[dir].idList[i],
+	     INFO_REQUEST, MPI_COMM_WORLD);
+    MPI_Recv(&buf, sizeof(node), MPI_BYTE, myNode.neighbors[dir].idList[i],
+	     INFO_REQUEST_ACK, MPI_COMM_WORLD, &status);
+
+    if( !isNodePerfectNeighbor(dir, &myNode, &buf) )
+      return 0;
+  }
+    
+  return 1;
 }
