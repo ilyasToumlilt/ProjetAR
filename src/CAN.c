@@ -339,6 +339,18 @@ void CANhandleInsertRequest(node* n)
 /*******************************************************************************
  * Step 4 : Remove
  ******************************************************************************/
+
+void CANremoveNode(int id)
+{
+  node buf;
+  MPI_Status status;
+
+  MPI_Send(&buf, 1, MPI_INT, id, U_CAN_REMOVE, MPI_COMM_WORLD);
+
+  MPI_Recv(&buf, 1, MPI_INT, id, DONE_REMOVE,
+	   MPI_COMM_WORLD, &status);
+}
+
 /**
  * Opérations de suppression d'un noeud.
  *
@@ -384,6 +396,8 @@ void CANremove()
 	       REQUEST_REMOVE, MPI_COMM_WORLD, &status);
     }
   }
+
+
   MPI_Send(&myNode, sizeof(node), MPI_BYTE, BOOTSTRAP_NODE,
          DONE_REMOVE, MPI_COMM_WORLD);
   return;
@@ -436,6 +450,7 @@ int CANhandleMessage()
       case INFO_REQUEST: CANhandleInfoRequest(&buf); break;
       case REQUEST_REMOVE: CANhandleRemoveRequest(&buf); break;
       case WANT_INFO: handleDisplayRequest(); break;
+      case U_CAN_REMOVE: CANremove(); break;
       case END: return -1; break;
       default: break;
       }
@@ -499,6 +514,8 @@ void CANhandleRemoveRequest(node* n)
 {
   /* d'abord je cherche la direction */
   int dir = findNodesDirection(n);
+
+  printf("node %d will remove %d\n");
 
   /* je me propage dans cette direction */
   propagateInNodesSpace(dir, n);
@@ -766,4 +783,16 @@ void CANend()
       MPI_Send(&buf, 1, MPI_INT, i, END, MPI_COMM_WORLD);      
     }
   }
+}
+
+int ifNeighborsCanTakeMyArea(int dir)
+{
+  node buf;
+  int i;
+  int ret=0;
+  
+  for(i=0; i<myNode.neighbor[dir])
+
+
+    return ret;
 }

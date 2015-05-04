@@ -24,6 +24,14 @@ int main(int argc, char** argv)
 
   printf("Post-Insert\n");
 
+  if( nbProcess == INIT_NODE ){
+    printf("---------Debut Affichage----------\n");
+    fflush(NULL);
+    sleep(1);
+    displayInit(nbProcess, "P2P_Viewer/trace/test-1.txt");
+    printf("--------- Fin Affichage ----------\n");
+  }
+
   while(1){
     CANhandleMessage();
   }

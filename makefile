@@ -12,6 +12,8 @@ LIB=lib
 OBJ=obj
 SRC=src
 
+P2P=P2P_Viewer
+
 all: directories can 
 
 
@@ -38,8 +40,14 @@ $(LIB)/libCAN.a: $(OBJ)/point.o $(OBJ)/space.o $(OBJ)/node.o $(OBJ)/data.o $(OBJ
 
 can: $(LIB)/libCAN.a
 
-main: can $(BIN)/CANmain
-	mpirun -np 200 $(BIN)/CANmain
+main: can $(BIN)/CANmain2
+	mpirun -np 10 $(BIN)/CANmain2
+
+view:
+	$(P2P)/$(BIN)/p2p_viewer $(P2P)/trace/test-1.txt $(P2P)/Web/index.html
+	#P2P_Viewer/$(BIN)/p2p_viewer trace/test-2.txt Web/index-2.html
+	chromium $(P2P)/Web/index.html #Web/index-2.html
+
 
 clean:
 	rm -f ${OBJ}/* ${BIN}/* ${LIB}/*
